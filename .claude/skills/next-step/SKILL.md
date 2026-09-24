@@ -1,11 +1,13 @@
 ---
 name: next-step
-description: Picks and runs the flow of this repo's skills for a piece of work, in order, with gates. Use when starting a feature, a bug fix, a new or broken Source, a new page, component or visual change, when resuming a Linear ticket (PET-n), or when asked what to do next. Not for one-off edits or questions.
+description: Picks and runs the flow of this repo's skills for a piece of work, in order, with gates. Use when starting a feature, a bug fix, a new page, component or visual change, when resuming a tracker issue, or when asked what to do next. Not for one-off edits or questions.
 ---
 
 # Next step
 
-Routes a situation to a **flow** (an ordered checklist of this repo's skills) and runs it. Typed as `/next-step [situation | PET-n]`, or loaded by the agent when a request matches its description. With no situation or ticket given, read the conversation so far, or resume from Linear (§ Tickets and resuming).
+Routes a situation to a **flow** (an ordered checklist of this repo's skills) and runs it. Typed as `/next-step [situation | <issue-id>]`, or loaded by the agent when a request matches its description. With no situation or issue given, read the conversation so far, or resume from the tracker (§ Tickets and resuming).
+
+Repo specifics live in `CLAUDE.md` and `docs/agents/`; this skill names the sections it needs. A section missing → ask the user for the fact, and suggest adding it there.
 
 ## Running a flow
 
@@ -13,7 +15,7 @@ Routes a situation to a **flow** (an ordered checklist of this repo's skills) an
 2. Copy the flow's checklist into your reply. Tick steps off as they finish and repost it at every gate.
 3. Run each skill step through the Skill tool, so its hooks fire. If the Skill tool refuses it (a user-invoked skill), read `.claude/skills/<skill>/SKILL.md` and follow it instead: resolve its relative links from that folder, and treat what the user typed after the command as its arguments.
 4. Go from step to step without asking, except at a gate ⏸.
-5. Only the user can type `/clear` and `/compact`. Where a flow needs one, stop and end with the exact next command, e.g. "Type `/clear`, then `/next-step PET-32`."
+5. Only the user can type `/clear` and `/compact`. Where a flow needs one, stop and end with the exact next command, e.g. "Type `/clear`, then `/next-step <issue-id>`."
 
 ## Gates ⏸
 
@@ -30,26 +32,26 @@ Stop and wait for the user:
 
 The flows below name these:
 
-- **branch**: before the first edit, if on `main`, branch from an up-to-date `main` as `pet-<n>-<slug>` (the spec's or issue's id), or `<slug>` without an issue. Never commit to `main`: Dokploy deploys it.
+- **branch**: before the first edit, if on the default branch, branch from it up to date, named by `CLAUDE.md` § Workflow's convention (the spec's or issue's id where there is one). Never commit to the default branch.
 - **implement**: follow `implement`, with two overrides: its `/code-review` is the **review** step below, and its commit waits for the commit gate.
-- **review**: `code-review` against `git merge-base origin/main HEAD`. The work is not committed yet, so diff the working tree (`git diff <merge-base>`), not `...HEAD`. Give it the ticket or spec (`PET-n`) as the spec, and `CLAUDE.md` and `DESIGN.md` as the standards. Fix what it finds that holds up; list anything you disagree with for the user.
-- **commit ⏸**, then **pr ⏸**: `pr` writes the body. The PR title or body names every ticket it closes (`Closes PET-31, PET-32`).
-- **screenshot**: start `scripts/preview.sh` in the background (it builds `.venv` and made-up demo data where none exist), then `playwright-cli` at the widths the change can reach (390px phone, 1280px desktop; a change scoped below 48rem needs only 390px). Save any login state only as `.playwright-cli/<name>.json`. No Playwright tests (CLAUDE.md § Tests).
+- **review**: `code-review` against `git merge-base origin/<default branch> HEAD`. The work is not committed yet, so diff the working tree (`git diff <merge-base>`), not `...HEAD`. Give it the ticket or spec as the spec, and `CLAUDE.md` (plus `DESIGN.md` if the repo has one) as the standards. Fix what it finds that holds up; list anything you disagree with for the user.
+- **commit ⏸**, then **pr ⏸**: `pr` writes the body. The PR names every ticket it closes, with the tracker's closing keyword (`docs/agents/issue-tracker.md`).
+- **screenshot**: start the preview command from `CLAUDE.md` § Commands in the background, then `playwright-cli` at the widths the change can reach (390px phone, 1280px desktop; a change scoped to one breakpoint needs only that width). Save any login state only as `.playwright-cli/<name>.json`.
 
 ## Tickets and resuming
 
-A flow's state lives in Linear (team Petters, project House Sniper; `docs/agents/issue-tracker.md`) and git, never in the session. Team Petters not reachable → stop.
+A flow's state lives in the tracker (`docs/agents/issue-tracker.md`) and git, never in the session. Tracker not reachable → stop.
 
-- **`/next-step PET-n`**: work on that issue only. Read it (`get_issue`, `list_comments`), its parent, sub-issues and blockers, then:
+- **`/next-step <issue-id>`**: work on that issue only. Read it, its comments, parent, sub-issues and blockers, then:
   - a spec (it has sub-issues) → list its open tickets with their blockers and ask which
   - a ticket with a parent spec → Feature, at the per-ticket step
-  - `ready-for-agent` with no parent → Small change from implement, or Bug if it's labelled `Bug`
+  - `ready-for-agent` with no parent → Small change from implement, or Bug if it's labelled a bug (`docs/agents/triage-labels.md`)
   - `needs-triage` or `needs-info` → Incoming issue
   - `ready-for-human` → say it's marked for a human; don't build it
-  - an open blocker → ask: proceed anyway, or the blocker first? A blocker In Review counts as done only if its commits are on the current branch.
-- **Bare `/next-step` in a fresh session**: find `PET-n` in the branch name and recent commits, list the parent spec's open tickets with their blockers, suggest an order and ask which. Never start one unasked.
-- **Status**: when implement starts, set `assignee: "me"`, `state: "In Progress"`; after its commit, `state: "In Review"`. Merging the PR that names a ticket moves it to Done.
-- Every ticket of a spec In Review or Done → next is pr.
+  - an open blocker → ask: proceed anyway, or the blocker first? A blocker in review counts as done only if its commits are on the current branch.
+- **Bare `/next-step` in a fresh session**: find an issue id in the branch name and recent commits, list the parent spec's open tickets with their blockers, suggest an order and ask which. Never start one unasked.
+- **Status**: when implement starts, assign yourself and move the issue to in progress; after its commit, to in review, if the tracker has those states. Merging the PR that names a ticket closes it.
+- Every ticket of a spec in review or done → next is pr.
 
 ## Pick a flow
 
@@ -57,16 +59,16 @@ A flow's state lives in Linear (team Petters, project House Sniper; `docs/agents
 |---|---|
 | New feature or behaviour needing more than one session | Feature |
 | A change that fits one session | Small change |
-| Something broken (not a Source's markup) | Bug |
-| A raw Linear issue you didn't write | Incoming issue |
-| Adding a Source | New Source |
-| A Source's collector raises or its markup moved | Source changed |
-| A new page in the public catalogue | New view |
+| Something broken | Bug |
+| A raw tracker issue you didn't write | Incoming issue |
+| A new page or screen | New view |
 | A new part inside an existing page | New component |
 | Spacing, type, colour, motion or copy | Visual tweak |
 | Tidying structure or finding what to delete | Code health |
 | Too big or foggy to plan in one session | Huge effort |
 | Mid-merge or mid-rebase; a question to research; editing a skill or `CLAUDE.md` | One-skill flows |
+
+The UI flows (New view, New component, Visual tweak) apply only to repos with a UI.
 
 ## Flows
 
@@ -74,10 +76,10 @@ A flow's state lives in Linear (team Petters, project House Sniper; `docs/agents
 
 ```
 - [ ] grill-with-docs ⏸
-- [ ] research, only for an unverified Source fact; wait for its file before the grilling closes
+- [ ] research, only for an unverified external fact (an API, a third-party behaviour); wait for its file before the grilling closes
 - [ ] to-spec (seam check ⏸)
 - [ ] to-tickets ⏸
-- [ ] per ticket: /clear, /next-step PET-n → branch → implement → review → commit ⏸ → In Review
+- [ ] per ticket: /clear, /next-step <issue-id> → branch → implement → review → commit ⏸ → in review
 - [ ] pr ⏸
 ```
 
@@ -105,32 +107,10 @@ No seam to pin the bug to → stop and propose Code health instead of patching a
 
 ```
 - [ ] triage ⏸ → ready-for-agent
-- [ ] /clear, /next-step PET-n
+- [ ] /clear, /next-step <issue-id>
 ```
 
 Triage only issues you didn't create; `to-tickets` output is already agent-ready.
-
-### New Source
-
-```
-- [ ] branch
-- [ ] research: listing URL, paging, labels and address format, verified on the live site, appended to docs/research/sources.md
-- [ ] save the pages the collector needs into finds/tests/pages/ via http_load or browser_load (manage.py shell)
-- [ ] tdd at seam 1 (saved page → collector → Records)
-- [ ] register: one line in SOURCES, and BONEO_BROKERAGES if the brokerage is on Boneo
-- [ ] collect <Source> against the live site: the Records match the page
-- [ ] review → commit ⏸ → pr ⏸
-```
-
-### Source changed
-
-```
-- [ ] branch
-- [ ] collect <Source> --save <dir>: re-save its fixtures first
-- [ ] run its collector tests: what goes red shows what moved
-- [ ] fix the collector until green; append the change to docs/research/sources.md
-- [ ] review → commit ⏸ → pr ⏸
-```
 
 ### New view
 
@@ -141,8 +121,8 @@ Impeccable's full sequence: shape, then new-work for a whole surface in the esta
 - [ ] grill-with-docs ⏸: what the page shows, and why
 - [ ] impeccable shape ⏸: its interview, then the brief you confirm
 - [ ] impeccable new-work §1-5 ⏸: the dealt structures; you lock one on the decision page
-- [ ] tdd at seam 4: the view, URL and context it renders (the data, not the look)
-- [ ] impeccable new-work §6: build the template and CSS
+- [ ] tdd at the rendering seam (CLAUDE.md § Tests): what the page renders (the data, not the look)
+- [ ] impeccable new-work §6: build it
 - [ ] impeccable new-work §7: screenshot round (screenshot step), finish reviewer, documenter
 - [ ] review → commit ⏸ → pr ⏸
 ```
@@ -154,7 +134,7 @@ In a cloud session you can't open a page served in the container: present the de
 ```
 - [ ] branch
 - [ ] impeccable shape ⏸ (skip for a variant of an existing part)
-- [ ] tdd at seam 4, if it changes what renders
+- [ ] tdd at the rendering seam, if it changes what renders
 - [ ] impeccable: build it inside the existing surface (new-work "Extend an existing surface")
 - [ ] impeccable audit → impeccable polish
 - [ ] screenshot
@@ -185,7 +165,7 @@ No tickets, and no new test unless the rendered content changes.
 
 ```
 - [ ] wayfinder ⏸: resolve the map's decision tickets one at a time
-- [ ] map clear: read the map issue and its Done tickets into the session (to-spec works from the conversation)
+- [ ] map clear: read the map issue and its done tickets into the session (to-spec works from the conversation)
 - [ ] Feature, from to-spec
 ```
 
@@ -194,7 +174,7 @@ Never go from the map straight to implement unless the effort turned out small. 
 ### One-skill flows
 
 - Mid-merge or mid-rebase → `resolving-merge-conflicts`.
-- A question to answer from primary sources → `research`; where the file goes is in CLAUDE.md § Live sites and evidence.
+- A question to answer from primary sources → `research`; where the file goes is in CLAUDE.md § Workflow.
 - Writing or editing a skill, `CLAUDE.md` or another agent doc → `writing-for-agents`; vendored skills are never edited (CLAUDE.md § Where the skills come from).
 
 ## Between steps
@@ -213,11 +193,11 @@ Ponytail's hooks have two quirks; tell the user when they bite:
 
 ## All skills
 
-- **Planning**: `grill-with-docs` (interview that records terms in `CONTEXT.md` and ADRs in `docs/adr/`), `grilling` (the bare interview), `to-spec` (spec as a Linear issue), `to-tickets` (tracer-bullet tickets with blocking edges), `wayfinder` (map of decision tickets), `triage` (raw issues to agent-ready ones).
+- **Planning**: `grill-with-docs` (interview that records terms in `CONTEXT.md` and ADRs in `docs/adr/`), `grilling` (the bare interview), `to-spec` (spec as a tracker issue), `to-tickets` (tracer-bullet tickets with blocking edges), `wayfinder` (map of decision tickets), `triage` (raw issues to agent-ready ones).
 - **Building**: `implement` (per ticket, test-first, closes with review), `tdd` (red-green at the agreed seams), `code-review` (Standards and Spec axes against a fixed point), `pr` (the PR body).
 - **Debugging**: `diagnosing-bugs` (feedback loop first, then a regression test), `resolving-merge-conflicts` (by intent; never `--abort`).
-- **UI (public catalogue)**: `impeccable` (the design workflow; `DESIGN.md` and `PRODUCT.md` are its brief; `live` is local-only), `playwright-cli` (open our pages served by `scripts/preview.sh` and screenshot them).
+- **UI**: `impeccable` (the design workflow, briefed by `PRODUCT.md` from `impeccable init` and `DESIGN.md` from `impeccable document` or new-work; `live` is local-only), `playwright-cli` (open pages served by the preview command and screenshot them).
 - **Code health**: `improve-codebase-architecture` (deepening opportunities), `codebase-design` (deep-module vocabulary), `domain-modeling` (sharpen a `CONTEXT.md` term or record an ADR), `ponytail-review` (over-engineering in a diff), `ponytail-audit` (in the whole repo), `ponytail-debt` (every `ponytail:` comment), `ponytail`, `ponytail-help`, `ponytail-gain` (the always-on lazy mode, its command card, its benchmarks).
 - **Research and writing**: `research` (cited Markdown from primary sources), `writing-for-agents` (skills, `CLAUDE.md`, agent docs).
 - **Session**: `wait-what` (re-explain the last message), `handoff` (a handoff document for another agent or directory).
-- **Setup**: `setup-matt-pocock-skills` (tracker, triage labels, doc layout; already run, see `docs/agents/`).
+- **Setup**: `setup-matt-pocock-skills` (tracker, triage labels, doc layout into `docs/agents/`; run once when adopting this template).
