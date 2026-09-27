@@ -21,7 +21,7 @@ Skills are vendored rather than installed as plugins because cloud sessions igno
 
 1. Copy everything except this README into the repo (merge `.gitignore` and any existing `.claude/settings.json` by hand). Needs Node on the machine for the hooks.
 2. Fill in `CLAUDE.md`: every `<!-- -->` prompt, then delete the prompts. Keep the section names: `next-step` refers to § Commands, § Tests, § Workflow and § Where the skills come from.
-3. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed.
+3. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`.
 4. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }`.
 5. UI repos: run `/impeccable init` for `PRODUCT.md`, and `/impeccable document` for `DESIGN.md` if the UI already exists.
 6. Try it: `/next-step` with a small change.
