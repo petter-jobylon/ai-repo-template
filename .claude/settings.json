@@ -1,4 +1,9 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(linearis:*)"
+    ]
+  },
   "env": {
     "PONYTAIL_SUBAGENT_MATCHER": "^(?!impeccable-)"
   },

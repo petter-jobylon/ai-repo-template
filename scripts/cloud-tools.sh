@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# SessionStart hook: puts the Playwright CLI (skill: .claude/skills/playwright-cli) in cloud sessions.
+# SessionStart hook: puts the Playwright CLI (skill: .claude/skills/playwright-cli) and the linearis CLI
+# (skill: .claude/skills/linearis) in cloud sessions.
 [ "$CLAUDE_CODE_REMOTE" = "true" ] || exit 0
 command -v playwright-cli >/dev/null || npm install -g @playwright/cli@latest >/dev/null 2>&1
+command -v linearis >/dev/null || npm install -g linearis >/dev/null 2>&1
 # cdn.playwright.dev is off the cloud allowlist, so use the image's Chromium; the container runs as root, hence no sandbox.
 # The egress proxy re-signs HTTPS with Anthropic CAs (in /root/.ccr/ca-bundle.crt) that Chromium's own
 # trust store lacks; add only those, re-read each session because they rotate.

@@ -27,6 +27,7 @@ add mattpocock/skills "${POCOCK[@]}"
 add DietrichGebert/ponytail "${PONYTAIL[@]}"
 add pbakaus/impeccable impeccable   # no engine binary: its launcher downloads a verified one per platform
 add microsoft/playwright-cli playwright-cli
+add linearis-oss/linearis linearis
 
 # ---- 3. Plugin parts the skills CLI doesn't carry ---------------------------
 git clone --depth 1 -q https://github.com/DietrichGebert/ponytail "$T/pony"

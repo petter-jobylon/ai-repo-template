@@ -61,6 +61,12 @@
       "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
       "computedHash": "2449db6ab1ded9581f69fcc56c1f64818112d05e271fd4c5da23c6523f9d3d9d"
     },
+    "linearis": {
+      "source": "linearis-oss/linearis",
+      "sourceType": "github",
+      "skillPath": "skills/linearis/SKILL.md",
+      "computedHash": "32f5577b04615143fc80b3dfc26153c7391b4716d72432e762da8008e47f3cb4"
+    },
     "playwright-cli": {
       "source": "microsoft/playwright-cli",
       "sourceType": "github",
