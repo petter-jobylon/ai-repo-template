@@ -3,7 +3,7 @@
 # so CI never passes while checking nothing. A target that does not apply here becomes
 # `@echo "n/a: <reason>"`, which records the choice.
 .DEFAULT_GOAL := help
-.PHONY: help setup up down seed check lint typecheck test test-db guards generate generate-check build
+.PHONY: help setup up down seed merge-check check lint typecheck test test-db guards generate generate-check build
 
 unconfigured = @echo "make $(1): not configured yet. Fill in this target for your stack (docs/agents/recipes/)." >&2; exit 1
 
@@ -45,5 +45,8 @@ generate-check: ## Fail when a generated file is stale, printing the command tha
 
 build: ## Build every configuration this repo ships
 	$(call unconfigured,build)
+
+merge-check: ## Is this branch low-risk enough for an agent to turn on auto-merge? (scripts/low-risk-paths.json)
+	node scripts/merge-check.js
 
 check: lint typecheck test test-db guards generate-check build ## Everything CI runs

@@ -12,6 +12,8 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 | `.claude/launch.json` | Empty; add your app's dev server |
 | `CLAUDE.md` | Skeleton with the sections `next-step` reads, plus hard rules, stop-and-ask, Definition of Done, first-principles questions and the decision tiers |
 | `AGENTS.md` | Pointer to `CLAUDE.md` for other agent tools, so each rule keeps one home |
+| `ARCHITECTURE.md` | Layers, dependency direction and one interface per cross-cutting concern; the `layers` guard (`scripts/checks/layers.json`) enforces the direction |
+| `scripts/low-risk-paths.json`, `scripts/merge-check.js` | What an agent may auto-merge once CI is green (`make merge-check`); anything else waits for your go-ahead |
 | `.claude/rules/` | Path-scoped rules (`api`, `data`, `tests`, `security`, `prod-scripts`, and `agent-tools` for products that expose AI agents), each loaded only for the paths in its header |
 | `.claude/loops.md` | Policy and registry for scheduled agents: propose, never merge, one worktree each |
 | `DECISIONS.md` | One-line decision log, beside ADRs in `docs/adr/` |
@@ -43,7 +45,7 @@ Skills are vendored rather than installed as plugins because cloud sessions igno
 4. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed.
 5. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "make", "runtimeArgs": ["up"], "port": 8000 }`.
 6. UI repos: run `/impeccable init` for `PRODUCT.md`, and `/impeccable document` for `DESIGN.md` if the UI already exists.
-7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. Set the globs in `scripts/checks/db-test-required.json`, or its `n/a` to the reason this repo has no data store. `make check` passing locally is the bar.
+7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. Set the globs in `scripts/checks/db-test-required.json` and the layers in `scripts/checks/layers.json` (with `ARCHITECTURE.md`), or each one's `n/a` to the reason it doesn't apply. Turn on "Allow auto-merge" in the repo settings if agents should auto-merge low-risk PRs. `make check` passing locally is the bar.
 8. Fill in `.github/CODEOWNERS`, then import the ruleset: `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. It requires `ci-summary`, so a red CI blocks the merge.
 9. Go through `docs/agents/guardrails.md`: mark each guardrail `yes` or `n/a` under Adopted here as the repo takes it on.
 10. Try it: `/next-step` with a small change.

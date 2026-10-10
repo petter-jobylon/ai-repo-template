@@ -7,6 +7,7 @@
 //   node scripts/checks/run.js --only <name>    one guard or pattern
 //   node scripts/checks/run.js --shrink         lower every baseline to today's counts
 //   node scripts/checks/run.js --init-baseline <name>   create a missing baseline
+//   node scripts/checks/run.js --report         what each baseline still allows, largest first
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -150,6 +151,17 @@ function main() {
     if (readBaseline(g.name)) { console.error(`${g.name} already has a baseline; it may only shrink (--shrink). Raising it is a reviewed edit with a DECISIONS.md line.`); process.exit(1); }
     writeBaseline(g.name, Object.fromEntries(results(g).counts));
     console.log(`wrote ${path.relative(ROOT, baselinePath(g.name))}`);
+    return;
+  }
+  if (flag('--report')) {
+    const rows = all.map((g) => {
+      const base = readBaseline(g.name);
+      const total = base ? Object.values(base).reduce((a, n) => a + n, 0) : 0;
+      return { name: g.name, files: base ? Object.keys(base).length : 0, total, has: !!base };
+    }).sort((a, b) => b.total - a.total);
+    console.log('Baselines (violations still allowed; each one only shrinks):');
+    for (const r of rows) console.log(`  ${String(r.total).padStart(6)}  ${r.name}${r.has ? ` (${r.files} ids)` : ' (no baseline: zero allowed)'}`);
+    console.log(`  ${String(rows.reduce((a, r) => a + r.total, 0)).padStart(6)}  total`);
     return;
   }
   if (flag('--shrink')) {

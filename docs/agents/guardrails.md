@@ -2,7 +2,7 @@
 
 Every guardrail this template carries, where it lives and how strong it is. Each comes from the public repo
 [erp-mafia/accounted](https://github.com/erp-mafia/accounted), a Swedish accounting SaaS that AI agents almost
-entirely coded; the evidence column says what happened there. The last group covers cloud sessions.
+entirely coded; the evidence column says what happened there. The last two groups come from the AI-Enabled Repository Checklist and from running agents in cloud sessions.
 
 - **Strength**: hard means a check, test or the data store refuses; soft means an instruction the agent should follow; process means a skill or flow step.
 - **Template**: `in place`, or the planned PR that adds it.
@@ -125,6 +125,21 @@ Use these only if the product exposes AI agents to customers. They protect again
 | Give agents stable error codes and a retry flag | product agents | `.claude/rules/agent-tools.md` rule 4 | hard | in place | not yet | 645 of 1,024 agent tool failures were UNKNOWN_ERROR |
 | Record who approved and through which way in | product agents | `.claude/rules/agent-tools.md` rule 5 | hard | in place | not yet | web approvals left no processing-history event |
 | Gate every way in and check the list | product agents | `.claude/rules/agent-tools.md` rule 6, stack recipe | hard | in place | not yet | the agent path bypassed the paywall one day after launch |
+
+## From the AI-enabled repository checklist
+
+These come from Matt Ferrante's AI-Enabled Repository Checklist (March 2026), not from Accounted.
+
+| Guardrail | When | Where | Strength | Template | Adopted here | Why |
+|---|---|---|---|---|---|---|
+| Write the layers down and enforce their direction | first month | `ARCHITECTURE.md`, `layers` guard, stack recipe | hard | in place | not yet | agents follow structure a check enforces, not structure a doc describes |
+| Give lint failures the exact fix | day one | guard contract (`scripts/checks/README.md`) | hard | in place | not yet | an agent fixes what the message tells it to; a vague message gets a guess |
+| Commit freely, ship one small PR per ticket | day one | `next-step` (commit step, Feature flow) | process | in place | not yet | short-lived PRs are easier to review and to merge while green |
+| Auto-merge only low-risk paths | first month | `scripts/low-risk-paths.json`, `make merge-check`, `CLAUDE.md` § Workflow | soft | in place | not yet | agents use your GitHub identity, so this is an instruction, not a CI check |
+| Parse input once at the boundary | first month | `.claude/rules/api.md` | soft | in place | not yet | code past the boundary trusts a typed value instead of re-checking raw input |
+| Performance budgets as tests | as you grow | `.claude/rules/tests.md` | soft | in place | not yet | a budget in a doc is never checked; a test fails when it is broken |
+| Fix flaky tests, never silence them | first month | `.claude/rules/tests.md` | soft | in place | not yet | a skipped flaky test hides the bug it was flaking on |
+| See what each baseline still allows | as you grow | `node scripts/checks/run.js --report` | process | in place | not yet | one view of where violations remain, with no extra file to keep current |
 
 ## Cloud sessions and secrets
 

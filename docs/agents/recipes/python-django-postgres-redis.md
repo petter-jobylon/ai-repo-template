@@ -176,6 +176,28 @@ def next_action(stage: Stage) -> str:
 
 Official tables live under `reference/<source>/` as JSON with the source URL and the date read at the top. A test loads the file and checks every value the product emits, so a wrong code fails before it reaches anyone outside.
 
+## Layers
+
+A common Django split: models hold data and its rules, services hold the use cases, and views and serializers call services, never models directly. `scripts/checks/layers.json`:
+
+```json
+{
+  "import_patterns": { ".py": ["^\\s*from\\s+([\\w.]+)\\s+import", "^\\s*import\\s+([\\w.]+)"] },
+  "layers": [
+    { "name": "models", "paths": ["**/models.py", "**/models/**"], "modules": ["\\.models(\\.|$)"], "may_import": [] },
+    { "name": "services", "paths": ["**/services.py", "**/services/**"], "modules": ["\\.services(\\.|$)"], "may_import": ["models"] },
+    { "name": "api", "paths": ["**/views.py", "**/serializers.py", "**/api/**"], "modules": ["\\.(views|serializers|api)(\\.|$)"], "may_import": ["services"] }
+  ],
+  "n/a": null
+}
+```
+
+Write the same three rows in `ARCHITECTURE.md`. Logging goes through one logger; the `no-print` pattern in `scripts/checks/README.md` § Examples keeps `print()` out of app code.
+
+## Low-risk paths
+
+Add `uv.lock` to `low_risk` in `scripts/low-risk-paths.json`, so a lockfile-only dependency bump can auto-merge once CI is green. A change to `pyproject.toml` still needs the user's go-ahead.
+
 ## Every way in is gated (product agents)
 
 For `.claude/rules/agent-tools.md` rule 6: a sweep over Django's URL resolver fails when a Django REST framework view is neither permission-gated nor on the explicit free list.

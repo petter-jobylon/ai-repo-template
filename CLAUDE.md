@@ -28,6 +28,8 @@ Stop and ask; do not guess. How agents reach tickets, logs, errors and metrics, 
 
 ## Architecture
 
+Layers, dependency direction and the one interface per cross-cutting concern: `ARCHITECTURE.md`, enforced by the `layers` guard.
+
 <!-- The big picture an agent can't get from one file: the main modules, how data flows between them, where state lives. -->
 
 ## Tests
@@ -80,7 +82,8 @@ This file holds what every session needs; keep it under about 120 lines. A rule 
 
 - Shared agent setup lives in the repo: settings, hooks, skills, rules and plans. A method the team relies on gets committed as one of those; personal settings stay in `.claude/settings.local.json`.
 - A session with more than one repo runs no repo's hooks. The make targets and CI never depend on a hook, so run them directly.
-- Scheduled agents (loops) follow `.claude/loops.md`: they propose and never merge, each in its own worktree.
+- Merging: an agent turns on auto-merge only when `make merge-check` says `LOW-RISK`; any other merge waits for the user's explicit go-ahead for that PR. This is an instruction, not a CI check: agents use the user's GitHub identity.
+- Scheduled agents (loops) follow `.claude/loops.md`: they propose, and merge only what `make merge-check` calls low-risk, each in its own worktree.
 - Guardrail work outranks ponytail: a test, check, rule update or `DECISIONS.md` line that the Definition of Done, a rule or a guard requires is part of the change. Ponytail decides how much product code to write.
 - Mark deliberate shortcuts with a `ponytail:` comment naming the limit and the upgrade path.
 - When a skill (e.g. `/tdd`'s seam check, the grilling skills) or the org's rules say to ask first, ask: that outranks ponytail's "never stall on an answer you can default".

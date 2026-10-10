@@ -2,9 +2,9 @@
 
 A **loop** is a scheduled agent: a routine, a scheduled CI job or a cron-started session that works without a person watching. Every loop follows this policy.
 
-## Propose, never merge
+## Propose; merge only what is low-risk
 
-- A loop may open PRs on a `loop/<loop name>-<ref>` branch, comment, label and file issues. It never merges, pushes to the default branch or approves. The ruleset backs this up: a PR and `ci-summary` are required for every change, and no bypass actor is listed.
+- A loop may open PRs on a `loop/<loop name>-<ref>` branch, comment, label and file issues. It never pushes to the default branch or approves, and it merges only by turning on auto-merge when `make merge-check` says `LOW-RISK`. The ruleset backs this up: a PR and `ci-summary` are required for every change, and no bypass actor is listed.
 - Ticket-only areas get an issue from a loop, never a PR. <!-- List this repo's ticket-only areas, e.g. migrations, auth, money, deletion of user data; usually the CLAUDE.md § Stop and ask areas. -->
 - A finding that already has an open issue gets a comment on it. One that was closed comes back as a reopen with the new evidence, never a duplicate.
 - Each loop run works in its own worktree on its own branch, so two loops or a loop and a person never share a checkout.

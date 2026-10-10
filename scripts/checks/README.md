@@ -30,3 +30,15 @@ The `add-baseline` skill walks through adding one.
 - Its violation id is the file path.
 - `failing_example` must match the regex, which is its self-test.
 - An `include` that matches no file fails.
+
+## Examples
+
+- `examples/file-size.js` is a guard that fails source files over a line limit, kept inactive until a repo copies it into `guards/` (steps are in its header).
+- A pattern that keeps logging behind the repo's one logging interface (`ARCHITECTURE.md` § Cross-cutting concerns). For Python:
+
+```json
+{ "name": "no-print", "regex": "^\\s*print\\(", "include": ["**/*.py"], "exclude": ["**/tests/**", "scripts/**"],
+  "message": "use the logger from <your logging module> instead of print()", "failing_example": "    print(order)" }
+```
+
+  For TypeScript, the same entry with `"regex": "\\bconsole\\.(log|debug)\\("` and `"include": ["src/**/*.ts"]`.

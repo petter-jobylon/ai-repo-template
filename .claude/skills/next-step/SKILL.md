@@ -24,8 +24,8 @@ Stop and wait for the user:
 - during an interview or a question a skill asks (`grill-with-docs`, `impeccable shape`, `impeccable` choices such as the decision page or `quieter`'s questions, `triage`, `wayfinder`)
 - at `to-spec`'s and `tdd`'s seam checks, unless the spec already agreed the seams
 - after `to-tickets`: the user approves the tickets
-- before every commit, push or PR
-- the environment's stop hook asking to commit and push (`stop-hook-git-check.sh` in cloud sessions) doesn't open this gate: stay stopped and tell the user it fired
+- before every push or PR (commits on your own branch need no gate)
+- the environment's stop hook asking to commit and push (`stop-hook-git-check.sh` in cloud sessions) doesn't open the push gate: commit if you haven't, stay stopped before the push, and tell the user it fired
 - when a step fails twice, or a skill or `CLAUDE.md` says to ask first (`CLAUDE.md` § Stop and ask)
 - when you park a choice for a person: write its `ESCALATED` line in `DECISIONS.md` first, and its `RESOLVED` line once answered (`CLAUDE.md` § Decisions)
 
@@ -34,10 +34,11 @@ Stop and wait for the user:
 The flows below name these:
 
 - **branch**: before the first edit, if on the default branch, branch from it up to date, named by `CLAUDE.md` § Workflow's convention (the spec's or issue's id where there is one). Never commit to the default branch.
-- **implement**: follow `implement`, with two overrides: its `/code-review` is the **review** step below, and its commit waits for the commit gate.
-- **review**: `code-review` against `git merge-base origin/<default branch> HEAD`. The work is not committed yet, so diff the working tree (`git diff <merge-base>`), not `...HEAD`. Give it the ticket or spec as the spec, and `CLAUDE.md`, every `.claude/rules/` file whose `paths:` match the diff (plus `DESIGN.md` if the repo has one) as the standards. Fix what it finds that holds up; list anything you disagree with for the user, and give each finding you decline its `DECISIONS.md` line with the reason.
-- **commit ⏸**: before the gate, walk `CLAUDE.md` § Definition of Done item by item and show the result; every item holds, or you name the one that doesn't and why.
-- **pr ⏸**: `pr` writes the body, filling every section of `.github/pull_request_template.md`: the three first-principles answers and what is not live yet. The PR names every ticket it closes, with the tracker's closing keyword (`docs/agents/issue-tracker.md`).
+- **implement**: follow `implement`, with two overrides: its `/code-review` is the **review** step below, and its commit is the **commit** step.
+- **review**: `code-review` against `git merge-base origin/<default branch> HEAD`. Diff the working tree against the merge base (`git diff <merge-base>`), which covers commits and uncommitted changes, not `...HEAD`. Give it the ticket or spec as the spec, and `CLAUDE.md`, every `.claude/rules/` file whose `paths:` match the diff (plus `DESIGN.md` if the repo has one) as the standards. Fix what it finds that holds up; list anything you disagree with for the user, and give each finding you decline its `DECISIONS.md` line with the reason.
+- **commit**: commit on the branch as often as the work needs, never on the default branch.
+- **pr ⏸**: before the gate, walk `CLAUDE.md` § Definition of Done item by item and show the result; every item holds, or you name the one that doesn't and why. Then push, and `pr` writes the body, filling every section of `.github/pull_request_template.md`: the three first-principles answers and what is not live yet. The PR names every ticket it closes, with the tracker's closing keyword (`docs/agents/issue-tracker.md`).
+- **merge**: run `make merge-check`. On `LOW-RISK`, turn on auto-merge (`gh pr merge --auto`); it merges once `ci-summary` passes. On `NEEDS PERMISSION`, the merge waits for the user, unless they said in this session that you may merge this PR.
 - **screenshot**: start `make up` in the background (`make seed` first if the page needs data; the URL is in `CLAUDE.md` § Commands), then `playwright-cli` at the widths the change can reach (390px phone, 1280px desktop; a change scoped to one breakpoint needs only that width). Save any login state only as `.playwright-cli/<name>.json`.
 
 ## Tickets and resuming
@@ -52,8 +53,8 @@ A flow's state lives in the tracker (`docs/agents/issue-tracker.md`) and git, ne
   - `ready-for-human` → say it's marked for a human; don't build it
   - an open blocker → ask: proceed anyway, or the blocker first? A blocker in review counts as done only if its commits are on the current branch.
 - **Bare `/next-step` in a fresh session**: find an issue id in the branch name and recent commits, list the parent spec's open tickets with their blockers, suggest an order and ask which. Never start one unasked.
-- **Status**: when implement starts, assign yourself and move the issue to in progress; after its commit, to in review, if the tracker has those states. Merging the PR that names a ticket closes it.
-- Every ticket of a spec in review or done → next is pr.
+- **Status**: when implement starts, assign yourself and move the issue to in progress; after its PR opens, to in review, if the tracker has those states. Merging the PR that names a ticket closes it.
+- Each ticket ships as its own PR; the spec is done when its last ticket's PR merges.
 
 ## Pick a flow
 
@@ -82,9 +83,7 @@ The UI flows (New view, New component, Visual tweak) apply only to repos with a 
 - [ ] research, only for an unverified external fact (an API, a third-party behaviour); wait for its file before the grilling closes
 - [ ] to-spec (seam check ⏸)
 - [ ] to-tickets ⏸
-- [ ] per ticket: /clear, /next-step <issue-id> → branch → implement → review → commit ⏸ → in review
-- [ ] skeptic-pass on the frozen head, when the spec touches a CLAUDE.md § Stop and ask area
-- [ ] pr ⏸
+- [ ] per ticket: /clear, /next-step <issue-id> → branch → implement → review → commit → skeptic-pass (when the ticket touches a CLAUDE.md § Stop and ask area) → pr ⏸ → merge → in review
 ```
 
 ### Small change
@@ -92,7 +91,7 @@ The UI flows (New view, New component, Visual tweak) apply only to repos with a 
 ```
 - [ ] grill-with-docs ⏸ (skip when the ask is already precise)
 - [ ] branch → implement → review, in this session
-- [ ] commit ⏸ → pr ⏸
+- [ ] commit → pr ⏸ → merge
 ```
 
 ### Bug
@@ -103,7 +102,7 @@ The UI flows (New view, New component, Visual tweak) apply only to repos with a 
 - [ ] tdd: regression test at the seam the bug shows through (CLAUDE.md § Tests)
 - [ ] fix → full suite green
 - [ ] guardrail-from-incident: name the mechanism, then a guard for the whole class (sibling-sweep first when the mechanism can recur elsewhere) and its DECISIONS.md line
-- [ ] review → commit ⏸ → pr ⏸
+- [ ] review → commit → pr ⏸ → merge
 ```
 
 No seam to pin the bug to → stop and propose Code health instead of patching around it.
@@ -129,7 +128,7 @@ Impeccable's full sequence: shape, then new-work for a whole surface in the esta
 - [ ] tdd at the rendering seam (CLAUDE.md § Tests): what the page renders (the data, not the look)
 - [ ] impeccable new-work §6: build it
 - [ ] impeccable new-work §7: screenshot round (screenshot step), finish reviewer, documenter
-- [ ] review → commit ⏸ → pr ⏸
+- [ ] review → commit → pr ⏸ → merge
 ```
 
 In a cloud session you can't open a page served in the container: present the decision page's choices in chat.
@@ -143,7 +142,7 @@ In a cloud session you can't open a page served in the container: present the de
 - [ ] impeccable: build it inside the existing surface (new-work "Extend an existing surface")
 - [ ] impeccable audit → impeccable polish
 - [ ] screenshot
-- [ ] review → commit ⏸
+- [ ] review → commit
 ```
 
 ### Visual tweak
@@ -153,7 +152,7 @@ In a cloud session you can't open a page served in the container: present the de
 - [ ] screenshot: "before"
 - [ ] the one impeccable command that fits (layout, typeset, colorize, quieter, bolder, clarify, animate…); its questions ⏸
 - [ ] screenshot: "after"; show both
-- [ ] commit ⏸
+- [ ] commit
 ```
 
 No tickets, and no new test unless the rendered content changes.
@@ -173,7 +172,7 @@ No tickets, and no new test unless the rendered content changes.
 - [ ] the change, with its failure message naming the fix and its fixture or failing_example; make guards shows the self-test PASS
 - [ ] a baseline only shrinks (`--shrink`); a raise gets a DECISIONS.md line with the reason ⏸
 - [ ] the rule's § Enforced by (or CLAUDE.md § Hard rules) names the guard
-- [ ] review → commit ⏸ → pr ⏸; code owners review it (.github/CODEOWNERS)
+- [ ] review → commit → pr ⏸ → merge; code owners review it (.github/CODEOWNERS)
 ```
 
 ### Huge effort
