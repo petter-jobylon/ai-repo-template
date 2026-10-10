@@ -1,6 +1,6 @@
 # ai-repo-template
 
-A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus `/next-step`, which picks and runs a flow of those skills (Feature, Small change, Bug, New view…) with gates before every commit, push or PR.
+A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus `/next-step`, which picks and runs a flow of those skills (Feature, Small change, Bug, New view…) with gates before every commit, push or PR. It also carries guardrails for repos written mostly by AI agents, taken from what worked in [erp-mafia/accounted](https://github.com/erp-mafia/accounted); `docs/agents/guardrails.md` lists each one, where it lives and how strong it is. Nothing in it assumes a language, framework or database.
 
 ## What's in it
 
@@ -10,7 +10,12 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 | `.claude/agents/`, `.claude/hooks/` | Impeccable's subagents, ponytail's hooks |
 | `.claude/settings.json` | Hook wiring |
 | `.claude/launch.json` | Empty; add your app's dev server |
-| `CLAUDE.md` | Skeleton with the sections `next-step` reads |
+| `CLAUDE.md` | Skeleton with the sections `next-step` reads, plus hard rules, stop-and-ask, Definition of Done, first-principles questions and the decision tiers |
+| `AGENTS.md` | Pointer to `CLAUDE.md` for other agent tools, so each rule keeps one home |
+| `.claude/rules/` | Path-scoped rule skeletons (`api`, `data`, `tests`, `security`), each loaded only for the paths in its header |
+| `DECISIONS.md` | One-line decision log, beside ADRs in `docs/adr/` |
+| `.github/pull_request_template.md` | First-principles answers, what is not live yet, Definition of Done |
+| `docs/agents/guardrails.md` | Every guardrail, where it lives, its strength, and whether this repo has adopted it |
 | `scripts/vendor-skills.sh` | Re-vendors every third-party skill to latest and self-tests the hooks |
 | `scripts/cloud-tools.sh` | Cloud sessions only: installs `playwright-cli` and `linearis`, and trusts the egress proxy's CAs |
 | `scripts/impeccable-scope.js` | Tells ponytail to leave design completeness to Impeccable |
@@ -20,11 +25,13 @@ Skills are vendored rather than installed as plugins because cloud sessions igno
 ## Adopting it
 
 1. Copy everything except this README into the repo (merge `.gitignore` and any existing `.claude/settings.json` by hand). Needs Node on the machine for the hooks.
-2. Fill in `CLAUDE.md`: every `<!-- -->` prompt, then delete the prompts. Keep the section names: `next-step` refers to § Commands, § Tests, § Workflow and § Where the skills come from.
-3. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed.
-4. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }`.
-5. UI repos: run `/impeccable init` for `PRODUCT.md`, and `/impeccable document` for `DESIGN.md` if the UI already exists.
-6. Try it: `/next-step` with a small change.
+2. Fill in `CLAUDE.md`: every `<!-- -->` prompt, then delete the prompts. Keep the section names: `next-step` refers to § Stop and ask, § Commands, § Tests, § Definition of Done, § Decisions, § Workflow and § Where the skills come from.
+3. Fill in the `.claude/rules/` files this repo needs (their `paths:` globs and conventions) and delete the rest; list the ones you keep in `CLAUDE.md` § Rules.
+4. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed.
+5. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }`.
+6. UI repos: run `/impeccable init` for `PRODUCT.md`, and `/impeccable document` for `DESIGN.md` if the UI already exists.
+7. Go through `docs/agents/guardrails.md`: mark each guardrail `yes` or `n/a` under Adopted here as the repo takes it on.
+8. Try it: `/next-step` with a small change.
 
 ## Updating the skills
 

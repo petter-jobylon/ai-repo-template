@@ -1,3 +1,5 @@
+# Personal Claude Code settings; shared settings live in .claude/settings.json
+.claude/settings.local.json
 .playwright-cli/
 # playwright-cli login state (cookies, tokens): never commit
 auth.json
