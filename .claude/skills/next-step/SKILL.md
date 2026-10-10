@@ -83,6 +83,7 @@ The UI flows (New view, New component, Visual tweak) apply only to repos with a 
 - [ ] to-spec (seam check ⏸)
 - [ ] to-tickets ⏸
 - [ ] per ticket: /clear, /next-step <issue-id> → branch → implement → review → commit ⏸ → in review
+- [ ] skeptic-pass on the frozen head, when the spec touches a CLAUDE.md § Stop and ask area
 - [ ] pr ⏸
 ```
 
@@ -100,8 +101,9 @@ The UI flows (New view, New component, Visual tweak) apply only to repos with a 
 - [ ] branch
 - [ ] diagnosing-bugs: one command that goes red on this bug, before any theory
 - [ ] tdd: regression test at the seam the bug shows through (CLAUDE.md § Tests)
-- [ ] fix → full suite green → review
-- [ ] commit ⏸ → pr ⏸
+- [ ] fix → full suite green
+- [ ] guardrail-from-incident: name the mechanism, then a guard for the whole class (sibling-sweep first when the mechanism can recur elsewhere) and its DECISIONS.md line
+- [ ] review → commit ⏸ → pr ⏸
 ```
 
 No seam to pin the bug to → stop and propose Code health instead of patching around it.
@@ -159,7 +161,7 @@ No tickets, and no new test unless the rendered content changes.
 ### Code health
 
 ```
-- [ ] improve-codebase-architecture (structure), ponytail-audit (what to delete), add-baseline (a rule that keeps being broken) or claim-sweep (agent docs that no longer match the code)
+- [ ] improve-codebase-architecture (structure), ponytail-audit (what to delete), sibling-sweep (a defect pattern across the codebase), add-baseline (a rule that keeps being broken) or claim-sweep (agent docs that no longer match the code)
 - [ ] pick one ⏸
 - [ ] a deepening pick is grilled inside improve-codebase-architecture itself → to-spec (Feature) or branch → implement (Small change); a deletion → Small change
 ```
@@ -197,6 +199,7 @@ Never go from the map straight to implement unless the effort turned out small. 
 - Near the smart zone (about 150k tokens) before that, `/compact` at the nearest phase boundary, never mid-step.
 - At a phase boundary the first that fits wins: **continue** (the next step needs this context verbatim and there's room) → **`/clear`** (nothing here matters next) → **`/handoff`** (a new directory, harness or colleague, or forking a side task) → **subagent** (runs without steering, e.g. a review) → **`/compact`** with an instruction on what to keep.
 - `/wait-what` whenever a message didn't land.
+- Parallel sessions and loops each work in their own worktree on their own branch (`git worktree add ../<repo>-<slug> -b <branch>`); two sessions never share a checkout. Loops follow `.claude/loops.md`, and `check-loops` confirms they run.
 
 ## Guide the user on ponytail
 
@@ -208,10 +211,10 @@ Ponytail's hooks have two quirks; tell the user when they bite:
 ## All skills
 
 - **Planning**: `grill-with-docs` (interview that records terms in `CONTEXT.md` and ADRs in `docs/adr/`), `grilling` (the bare interview), `to-spec` (spec as a tracker issue), `to-tickets` (tracer-bullet tickets with blocking edges), `wayfinder` (map of decision tickets), `triage` (raw issues to agent-ready ones).
-- **Building**: `implement` (per ticket, test-first, closes with review), `tdd` (red-green at the agreed seams), `code-review` (Standards and Spec axes against a fixed point), `pr` (the PR body).
-- **Debugging**: `diagnosing-bugs` (feedback loop first, then a regression test), `resolving-merge-conflicts` (by intent; never `--abort`).
+- **Building**: `implement` (per ticket, test-first, closes with review), `tdd` (red-green at the agreed seams), `code-review` (Standards and Spec axes against a fixed point), `skeptic-pass` (independent agents try to refute a frozen head), `pr` (the PR body).
+- **Debugging**: `diagnosing-bugs` (feedback loop first, then a regression test), `guardrail-from-incident` (a guard for the whole class of a fixed bug), `sibling-sweep` (every sibling of a defect, fixed, with a detector left behind), `resolving-merge-conflicts` (by intent; never `--abort`).
 - **UI**: `impeccable` (the design workflow, briefed by `PRODUCT.md` from `impeccable init` and `DESIGN.md` from `impeccable document` or new-work; `live` is local-only), `playwright-cli` (open pages served by the preview command and screenshot them).
 - **Code health**: `improve-codebase-architecture` (deepening opportunities), `codebase-design` (deep-module vocabulary), `domain-modeling` (sharpen a `CONTEXT.md` term or record an ADR), `add-baseline` (adopt a strict rule with a baseline that only shrinks), `claim-sweep` (test agent docs' claims against the code), `ponytail-review` (over-engineering in a diff), `ponytail-audit` (in the whole repo), `ponytail-debt` (every `ponytail:` comment), `ponytail`, `ponytail-help`, `ponytail-gain` (the always-on lazy mode, its command card, its benchmarks).
 - **Research and writing**: `research` (cited Markdown from primary sources), `write-domain-skill` (a sourced domain reference that replaces training data), `writing-for-agents` (skills, `CLAUDE.md`, agent docs).
-- **Session**: `wait-what` (re-explain the last message), `handoff` (a handoff document for another agent or directory).
+- **Session**: `wait-what` (re-explain the last message), `check-loops` (every loop in `.claude/loops.md` is running), `handoff` (a handoff document for another agent or directory).
 - **Setup**: `setup-matt-pocock-skills` (tracker, triage labels, doc layout into `docs/agents/`; run once when adopting this template).

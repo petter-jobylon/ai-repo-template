@@ -75,7 +75,7 @@ A second model catches what the author agent misses, and some calls belong to pe
 | Guardrail | When | Where | Strength | Template | Adopted here | Evidence in Accounted |
 |---|---|---|---|---|---|---|
 | Record what happened to each AI review finding | first month | `CLAUDE.md` § Decisions, `next-step` review step | soft | in place | not yet | about 54 declines logged, 21 of them naming a review bot |
-| Run an adversarial second-agent pass before the PR | as you grow | `skeptic-pass` skill | process | planned (PR 4) | not yet | skeptic passes in 140 commits; counterexamples became tests |
+| Run an adversarial second-agent pass before the PR | as you grow | `skeptic-pass` skill, `next-step` Feature flow | process | in place | not yet | skeptic passes in 140 commits; counterexamples became tests |
 | Assign human reviewers to the guardrail files | first month | `.github/CODEOWNERS` | hard | in place | not yet | no CODEOWNERS; both baseline raises went unexplained |
 | Make production scripts dry-run by default | first month | `.claude/rules/prod-scripts.md`, recipe example | soft | in place | not yet | a repair script needs the hash of its reviewed dry run |
 | Track escalated decisions until someone resolves them | as you grow | `CLAUDE.md` § Decisions (ESCALATED / RESOLVED) | soft | in place | not yet | 39 of 72 parked founder calls show no resolution |
@@ -97,10 +97,10 @@ Scheduled agents (loops) and parallel sessions can overreach, collide or never s
 
 | Guardrail | When | Where | Strength | Template | Adopted here | Evidence in Accounted |
 |---|---|---|---|---|---|---|
-| Let loops propose and never merge | as you grow | `.claude/loops.md` | soft | planned (PR 4) | not yet | loops open PRs and never merge; risky areas are ticket-only |
-| Check at session start that every loop runs | as you grow | `loop-ignite` skill, SessionStart hook | process | planned (PR 4) | not yet | 'check the pr comments' was typed 323 times before loops existed |
+| Let loops propose and never merge | as you grow | `.claude/loops.md`, ruleset | soft | in place | not yet | loops open PRs and never merge; risky areas are ticket-only |
+| Check at session start that every loop runs | as you grow | `check-loops` skill | process | in place | not yet | 'check the pr comments' was typed 323 times before loops existed |
 | Make local checks call the same scripts as CI | as you grow | `Makefile` targets shared by CI, hooks and loops | hard | in place | not yet | a hand-copied loop check greps moved folders and never fires |
-| Give each parallel agent its own worktree | as you grow | `next-step`, `.claude/loops.md` | process | planned (PR 4) | not yet | shared checkouts corrupted commits across sessions |
+| Give each parallel agent its own worktree | as you grow | `next-step` § Between steps, `.claude/loops.md` | process | in place | not yet | shared checkouts corrupted commits across sessions |
 
 ## Memory and learning from incidents
 
@@ -109,8 +109,8 @@ Agents keep no memory between sessions, so the repo has to. These items record w
 | Guardrail | When | Where | Strength | Template | Adopted here | Evidence in Accounted |
 |---|---|---|---|---|---|---|
 | Keep a one-line decision log in the repo | day one | `DECISIONS.md`, `CLAUDE.md` § Decisions | soft | in place | not yet | 2,521 entries in three months; 41% name a rejected option |
-| Ship fix, class guard and log line together | day one | `guardrail-from-incident` skill, `next-step` Bug flow | process | planned (PR 4) | not yet | 22 of 23 guards shipped in the fix's own PR |
-| Sweep for every sibling of a defect | as you grow | `sibling-sweep` skill | process | planned (PR 4) | not yet | one sweep: about 150 findings, 28 defects, three new baseline guards |
+| Ship fix, class guard and log line together | day one | `guardrail-from-incident` skill, `next-step` Bug flow | process | in place | not yet | 22 of 23 guards shipped in the fix's own PR |
+| Sweep for every sibling of a defect | as you grow | `sibling-sweep` skill, `next-step` Code health flow | process | in place | not yet | one sweep: about 150 findings, 28 defects, three new baseline guards |
 | Commit the agent setup the team depends on | day one | `CLAUDE.md` § Workflow, `.gitignore` | soft | in place | not yet | only 4 of 10 working methods were in the repo |
 
 ## Guardrails for the product's own AI agents
@@ -119,9 +119,9 @@ Use these only if the product exposes AI agents to customers. They protect again
 
 | Guardrail | When | Where | Strength | Template | Adopted here | Evidence in Accounted |
 |---|---|---|---|---|---|---|
-| Stage every agent write for human approval | product agents | `docs/agents/product-agents.md` | hard | planned (PR 4) | not yet | every agent write is staged for a human to approve |
-| Tier every operation by risk; unknown is high | product agents | `docs/agents/product-agents.md` | hard | planned (PR 4) | not yet | 156 risk types; an unknown type counts as high |
-| Enforce on the server what the prompt asks | product agents | `docs/agents/product-agents.md` | hard | planned (PR 4) | not yet | a prompt-only rule became a server-side refusal |
-| Give agents stable error codes and a retry flag | product agents | `docs/agents/product-agents.md` | hard | planned (PR 4) | not yet | 645 of 1,024 agent tool failures were UNKNOWN_ERROR |
-| Record who approved and through which way in | product agents | `docs/agents/product-agents.md` | hard | planned (PR 4) | not yet | web approvals left no processing-history event |
-| Gate every way in and check the list | product agents | `docs/agents/product-agents.md` | hard | planned (PR 4) | not yet | the agent path bypassed the paywall one day after launch |
+| Stage every agent write for human approval | product agents | `.claude/rules/agent-tools.md` rule 1 | hard | in place | not yet | every agent write is staged for a human to approve |
+| Tier every operation by risk; unknown is high | product agents | `.claude/rules/agent-tools.md` rule 2 | hard | in place | not yet | 156 risk types; an unknown type counts as high |
+| Enforce on the server what the prompt asks | product agents | `.claude/rules/agent-tools.md` rule 3 | hard | in place | not yet | a prompt-only rule became a server-side refusal |
+| Give agents stable error codes and a retry flag | product agents | `.claude/rules/agent-tools.md` rule 4 | hard | in place | not yet | 645 of 1,024 agent tool failures were UNKNOWN_ERROR |
+| Record who approved and through which way in | product agents | `.claude/rules/agent-tools.md` rule 5 | hard | in place | not yet | web approvals left no processing-history event |
+| Gate every way in and check the list | product agents | `.claude/rules/agent-tools.md` rule 6, stack recipe | hard | in place | not yet | the agent path bypassed the paywall one day after launch |

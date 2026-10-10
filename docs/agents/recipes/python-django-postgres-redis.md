@@ -131,6 +131,33 @@ def next_action(stage: Stage) -> str:
 
 Official tables live under `reference/<source>/` as JSON with the source URL and the date read at the top. A test loads the file and checks every value the product emits, so a wrong code fails before it reaches anyone outside.
 
+## Every way in is gated (product agents)
+
+For `.claude/rules/agent-tools.md` rule 6: a sweep over Django's URL resolver fails when a Django REST framework view is neither permission-gated nor on the explicit free list.
+
+```python
+from django.urls import get_resolver
+from rest_framework.permissions import AllowAny
+
+FREE = {"health", "login", "public-job-list"}  # URL names that are open on purpose
+
+def views(patterns=None):
+    for p in patterns or get_resolver().url_patterns:
+        if hasattr(p, "url_patterns"):
+            yield from views(p.url_patterns)
+        else:
+            yield p
+
+def test_every_api_view_is_gated_or_listed_free():
+    open_views = [
+        p.name for p in views()
+        if hasattr(p.callback, "cls")  # DRF views; permission_classes falls back to the settings default
+        and p.name not in FREE
+        and AllowAny in p.callback.cls.permission_classes
+    ]
+    assert not open_views, f"gate these views, or add them to FREE with a reason: {open_views}"
+```
+
 ## CI toolchain step
 
 In `.github/actions/setup/action.yml`, replace the `TOOLCHAIN` comment with:

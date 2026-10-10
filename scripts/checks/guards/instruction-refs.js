@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Guard: every repo path and `make <target>` named in an agent doc exists, and CLAUDE.md
-// stays within its line cap. Agent docs: CLAUDE.md, AGENTS.md, README.md, .claude/rules/,
+// stays within its line cap. Agent docs: CLAUDE.md, AGENTS.md, README.md, .claude/loops.md, .claude/rules/,
 // hand-written skills (not in skills-lock.json) and docs/agents/ (minus the guardrails map
 // and recipes). Paths created on first use go in scripts/checks/instruction-refs.ignore.
 'use strict';
@@ -25,7 +25,7 @@ function walk(dir) {
 let vendored = [];
 if (exists('skills-lock.json')) vendored = Object.keys(JSON.parse(read('skills-lock.json')).skills || {});
 const docs = [
-  ...['CLAUDE.md', 'AGENTS.md', 'README.md'].filter(exists),
+  ...['CLAUDE.md', 'AGENTS.md', 'README.md', '.claude/loops.md'].filter(exists),
   ...walk('.claude/rules'),
   ...(exists('.claude/skills') ? fs.readdirSync(path.join(ROOT, '.claude/skills')) : [])
     .filter((d) => !vendored.includes(d)).flatMap((d) => walk(path.join('.claude/skills', d))),

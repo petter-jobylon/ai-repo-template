@@ -78,6 +78,7 @@ This file holds what every session needs; keep it under about 120 lines. A rule 
 <!-- What deploys the default branch, if anything. -->
 
 - Shared agent setup lives in the repo: settings, hooks, skills, rules and plans. A method the team relies on gets committed as one of those; personal settings stay in `.claude/settings.local.json`.
+- Scheduled agents (loops) follow `.claude/loops.md`: they propose and never merge, each in its own worktree.
 - Guardrail work outranks ponytail: a test, check, rule update or `DECISIONS.md` line that the Definition of Done, a rule or a guard requires is part of the change. Ponytail decides how much product code to write.
 - Mark deliberate shortcuts with a `ponytail:` comment naming the limit and the upgrade path.
 - When a skill (e.g. `/tdd`'s seam check, the grilling skills) or the org's rules say to ask first, ask: that outranks ponytail's "never stall on an answer you can default".
