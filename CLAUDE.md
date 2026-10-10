@@ -55,7 +55,7 @@ A change is done when all of these hold; iterate until they do:
 Two tiers, so every non-obvious choice is recorded somewhere:
 
 - **ADR** (`docs/adr/`, via `/domain-modeling`): a choice that is hard to reverse, surprising without context and a real trade-off.
-- **`DECISIONS.md` line** for every other non-obvious choice: picked A over B, declined a dependency, declined a review finding, stopped because a rule forbade something, diverged from the issue's proposal. One line of at most 300 characters: `[YYYY-MM-DD] <decision>: <why>`. The detail goes in the PR body.
+- **`DECISIONS.md` line** for every other non-obvious choice: picked A over B, declined a dependency, declined a review finding, stopped because a rule forbade something, diverged from the issue's proposal. One line of at most 300 characters: `[YYYY-MM-DD] <decision>: <why>`; the `decisions-format` guard fails any other shape or a longer line. The detail goes in the PR body.
 
 The ADR criteria decide which tier a choice goes in; a choice that misses them gets a `DECISIONS.md` line. Grep `DECISIONS.md` and `docs/adr/` before reopening a past choice. A question parked for a person gets `[YYYY-MM-DD] ESCALATED: <question> -> <who>`, and later `[YYYY-MM-DD] RESOLVED <escalated date>: <answer>`. Completed months move to `docs/decisions/YYYY-MM.md`.
 
