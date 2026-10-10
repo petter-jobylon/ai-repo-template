@@ -28,10 +28,10 @@ Agents skip text rules that leave no trace. These items move what must hold into
 | Guardrail | When | Where | Strength | Template | Adopted here | Evidence in Accounted |
 |---|---|---|---|---|---|---|
 | Turn every must-hold rule into a CI gate | day one | `scripts/checks/` guard runner, `make guards` | hard | in place | not yet | a test rule held in 72% of commits as text and 246 of 246 as a gate |
-| Put rules that must never break in the database | day one | `.claude/rules/data.md`, stack recipe | hard | planned (PR 3) | not yet | ledger triggers with no role exception, added in the first week |
-| Give each dangerous action one way in | first month | pattern guard (`scripts/checks/patterns.json`), `.claude/rules/` | hard | planned (PR 3) | not yet | one posting function; triggers refuse direct writes around it |
-| Let the compiler force every case | first month | `.claude/rules/`, stack recipe | hard | planned (PR 3) | not yet | a typed map fails to compile until each new value has an entry |
-| Fail closed when a check cannot run | first month | `CLAUDE.md` § Hard rules, `.claude/rules/` | soft | planned (PR 3) | not yet | a swallowed query error was read as 'open' on three paths |
+| Put rules that must never break in the database | day one | `CLAUDE.md` § Hard rules 1, `.claude/rules/data.md`, stack recipe | hard | in place | not yet | ledger triggers with no role exception, added in the first week |
+| Give each dangerous action one way in | first month | `CLAUDE.md` § Hard rules 2, pattern guard (`scripts/checks/patterns.json`) | hard | in place | not yet | one posting function; triggers refuse direct writes around it |
+| Let the compiler force every case | first month | `CLAUDE.md` § Hard rules 4, stack recipe | hard | in place | not yet | a typed map fails to compile until each new value has an entry |
+| Fail closed when a check cannot run | first month | `CLAUDE.md` § Hard rules 3 | soft | in place | not yet | a swallowed query error was read as 'open' on three paths |
 
 ## Tests that see the real system
 
@@ -39,8 +39,8 @@ Mocks accept any query, so a change can pass every unit test and still be wrong 
 
 | Guardrail | When | Where | Strength | Template | Adopted here | Evidence in Accounted |
 |---|---|---|---|---|---|---|
-| Add a real-database test layer early | day one | `make test-db`, `.claude/rules/tests.md`, stack recipe | hard | planned (PR 3) | not yet | 364 real-Postgres test files; mocks let a dropped trigger ship green |
-| Write tests that sweep the whole set | first month | catalog sweep tests, stack recipe | hard | planned (PR 3) | not yet | about 85 test files sweep the database catalog |
+| Add a real-database test layer early | day one | `make test-db`, `db-test-required` guard, `.claude/rules/tests.md`, stack recipe | hard | in place | not yet | 364 real-Postgres test files; mocks let a dropped trigger ship green |
+| Write tests that sweep the whole set | first month | `.claude/rules/tests.md`, stack recipe (sweep example) | hard | in place | not yet | about 85 test files sweep the database catalog |
 | Prove every check can fail | first month | guard runner self-tests, `scripts/checks/fixtures/` | hard | in place | not yet | a test layer passed green while exercising nothing, twice |
 
 ## Guard scripts, baselines and drift checks
@@ -52,9 +52,9 @@ A guard with a baseline fails new violations and lets old ones stay. These scrip
 | Run lint and typecheck in CI from day one | day one | `make lint`, `make typecheck`, CI workflow | hard | in place | not yet | lint was never wired into CI and about 60 errors piled up |
 | Adopt strict rules with a baseline | first month | `scripts/checks/baselines/`, `scripts/checks/patterns.json`, `add-baseline` skill | hard | in place | not yet | 2 raises in 46 baseline changes; route auth went from 171 files to 1 |
 | Make every failure message print the fix | day one | guard contract (`scripts/checks/README.md`) | hard | in place | not yet | guards print the lines to add; database refusals name the lawful path |
-| Generate copies and fail CI when stale | first month | `make generate`, `make generate-check` | hard | planned (PR 3) | not yet | hand-kept crontabs had lost 7 of 16 jobs |
-| Test both sides when code cannot be shared | as you grow | `.claude/rules/tests.md`, stack recipe | hard | planned (PR 3) | not yet | one bank match booked a different voucher through each way in |
-| Sweep agent instructions for stale claims regularly | first month | `instruction-refs` guard; `claim-sweep` skill (planned, PR 3) | hard + process | in place | not yet | a sweep found 28 stale claims across 279 agent files, none caught |
+| Generate copies and fail CI when stale | first month | `make generate-check`, `CLAUDE.md` § Hard rules 5 | hard | in place | not yet | hand-kept crontabs had lost 7 of 16 jobs |
+| Test both sides when code cannot be shared | as you grow | `.claude/rules/tests.md`, `CLAUDE.md` § Hard rules 5, stack recipe | hard | in place | not yet | one bank match booked a different voucher through each way in |
+| Sweep agent instructions for stale claims regularly | first month | `instruction-refs` guard, `claim-sweep` skill | hard + process | in place | not yet | a sweep found 28 stale claims across 279 agent files, none caught |
 
 ## CI and the merge
 
@@ -86,10 +86,10 @@ The failure here is a confident wrong fact, such as an account, a tax code or a 
 
 | Guardrail | When | Where | Strength | Template | Adopted here | Evidence in Accounted |
 |---|---|---|---|---|---|---|
-| Put domain rules in skills agents must use | first month | `domain-skill-template` skill | soft | planned (PR 3) | not yet | 16 law skills tell agents to use them over training data |
-| Add never-guess tables to domain skills | first month | `domain-skill-template` skill | soft | planned (PR 3) | not yet | 45 situation rows, 23 of them resolved by asking the user |
-| Pin official reference tables in tests | first month | `.claude/rules/tests.md`, stack recipe | hard | planned (PR 3) | not yet | a wrong tax form code got two customers' filings rejected |
-| Test the facts in skills against the code | as you grow | stack recipe | hard | planned (PR 3) | not yet | 9 of 36 sampled skill facts contradict the code |
+| Put domain rules in skills agents must use | first month | `write-domain-skill` skill | soft | in place | not yet | 16 law skills tell agents to use them over training data |
+| Add never-guess tables to domain skills | first month | `write-domain-skill` skill | soft | in place | not yet | 45 situation rows, 23 of them resolved by asking the user |
+| Pin official reference tables in tests | first month | `.claude/rules/tests.md`, `write-domain-skill` skill, stack recipe | hard | in place | not yet | a wrong tax form code got two customers' filings rejected |
+| Test the facts in skills against the code | as you grow | `.claude/rules/tests.md`, `write-domain-skill` skill | hard | in place | not yet | 9 of 36 sampled skill facts contradict the code |
 
 ## Autonomous loops and parallel agents
 

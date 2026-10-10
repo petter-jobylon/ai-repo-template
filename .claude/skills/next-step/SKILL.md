@@ -159,7 +159,7 @@ No tickets, and no new test unless the rendered content changes.
 ### Code health
 
 ```
-- [ ] improve-codebase-architecture (structure), ponytail-audit (what to delete) or add-baseline (a rule that keeps being broken)
+- [ ] improve-codebase-architecture (structure), ponytail-audit (what to delete), add-baseline (a rule that keeps being broken) or claim-sweep (agent docs that no longer match the code)
 - [ ] pick one ⏸
 - [ ] a deepening pick is grilled inside improve-codebase-architecture itself → to-spec (Feature) or branch → implement (Small change); a deletion → Small change
 ```
@@ -187,6 +187,7 @@ Never go from the map straight to implement unless the effort turned out small. 
 ### One-skill flows
 
 - Mid-merge or mid-rebase → `resolving-merge-conflicts`.
+- A domain agents keep getting wrong (law, tax, a standard) → `write-domain-skill`.
 - A question to answer from primary sources → `research`; where the file goes is in CLAUDE.md § Workflow.
 - Writing or editing a skill, `CLAUDE.md`, a `.claude/rules/` file or another agent doc → `writing-for-agents`, keeping each rule in one home (`CLAUDE.md` § Rules); vendored skills are never edited (CLAUDE.md § Where the skills come from).
 
@@ -210,7 +211,7 @@ Ponytail's hooks have two quirks; tell the user when they bite:
 - **Building**: `implement` (per ticket, test-first, closes with review), `tdd` (red-green at the agreed seams), `code-review` (Standards and Spec axes against a fixed point), `pr` (the PR body).
 - **Debugging**: `diagnosing-bugs` (feedback loop first, then a regression test), `resolving-merge-conflicts` (by intent; never `--abort`).
 - **UI**: `impeccable` (the design workflow, briefed by `PRODUCT.md` from `impeccable init` and `DESIGN.md` from `impeccable document` or new-work; `live` is local-only), `playwright-cli` (open pages served by the preview command and screenshot them).
-- **Code health**: `improve-codebase-architecture` (deepening opportunities), `codebase-design` (deep-module vocabulary), `domain-modeling` (sharpen a `CONTEXT.md` term or record an ADR), `add-baseline` (adopt a strict rule with a baseline that only shrinks), `ponytail-review` (over-engineering in a diff), `ponytail-audit` (in the whole repo), `ponytail-debt` (every `ponytail:` comment), `ponytail`, `ponytail-help`, `ponytail-gain` (the always-on lazy mode, its command card, its benchmarks).
-- **Research and writing**: `research` (cited Markdown from primary sources), `writing-for-agents` (skills, `CLAUDE.md`, agent docs).
+- **Code health**: `improve-codebase-architecture` (deepening opportunities), `codebase-design` (deep-module vocabulary), `domain-modeling` (sharpen a `CONTEXT.md` term or record an ADR), `add-baseline` (adopt a strict rule with a baseline that only shrinks), `claim-sweep` (test agent docs' claims against the code), `ponytail-review` (over-engineering in a diff), `ponytail-audit` (in the whole repo), `ponytail-debt` (every `ponytail:` comment), `ponytail`, `ponytail-help`, `ponytail-gain` (the always-on lazy mode, its command card, its benchmarks).
+- **Research and writing**: `research` (cited Markdown from primary sources), `write-domain-skill` (a sourced domain reference that replaces training data), `writing-for-agents` (skills, `CLAUDE.md`, agent docs).
 - **Session**: `wait-what` (re-explain the last message), `handoff` (a handoff document for another agent or directory).
 - **Setup**: `setup-matt-pocock-skills` (tracker, triage labels, doc layout into `docs/agents/`; run once when adopting this template).

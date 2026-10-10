@@ -27,9 +27,109 @@ generate-check: ## Fail when a generated file is stale
 build: ## Build every configuration this repo ships
 	docker build --tag app:ci .
 	uv run python manage.py check --deploy
+
+test-db: ## Tests against the real data stores
+	docker compose -f compose.test.yml -p $(notdir $(CURDIR))-test up -d --wait
+	DATABASE_URL=postgres://postgres:test@127.0.0.1:55432/app_test REDIS_URL=redis://127.0.0.1:56379/0 \
+	  uv run pytest -m db; status=$$?; \
+	  docker compose -f compose.test.yml -p $(notdir $(CURDIR))-test down -v; exit $$status
 ```
 
-`test-db` arrives with the real-database layer: a compose file that starts PostgreSQL and Redis, runs the `db`-marked tests against them and stops them.
+The test settings read `DATABASE_URL` and `REDIS_URL` (for example with `dj-database-url`). pytest-django builds the test database from every migration, so each run replays the schema from empty.
+
+## compose.test.yml
+
+```yaml
+# Real stores for `make test-db`. Images come from Google's Docker Hub mirror because
+# anonymous Docker Hub pulls are rate-limited in cloud sessions (429).
+services:
+  postgres:
+    image: mirror.gcr.io/library/postgres:16-alpine
+    environment: { POSTGRES_PASSWORD: test, POSTGRES_DB: app_test }
+    ports: ["55432:5432"]
+    tmpfs: ["/var/lib/postgresql/data"]
+    healthcheck: { test: ["CMD", "pg_isready", "-U", "postgres"], interval: 1s, retries: 30 }
+  redis:
+    image: mirror.gcr.io/library/redis:7-alpine
+    ports: ["56379:6379"]
+    healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 1s, retries: 30 }
+```
+
+Match the image versions to production. In a cloud session the `scripts/cloud-tools.sh` hook starts the Docker daemon if it is stopped; putting `docker compose -f compose.test.yml pull` in the environment's setup script caches the images between sessions.
+
+## db-test-required guard
+
+`scripts/checks/db-test-required.json`:
+
+```json
+{
+  "migrations": ["**/migrations/*.py"],
+  "tests": ["**/tests/db/**", "**/test_*_db.py"],
+  "n/a": null
+}
+```
+
+Mark real-store tests with `@pytest.mark.db` and keep them where those globs find them. A migration that needs no test of its own says so in a comment: `# db-test: skip only renames a help text`.
+
+## Sweep and parity tests
+
+A sweep test reads the catalog, so a new table is checked without anyone adding it to a list (this one checks single-column foreign keys):
+
+```python
+import pytest
+from django.db import connection
+
+@pytest.mark.db
+def test_every_foreign_key_has_an_index():
+    with connection.cursor() as cur:
+        cur.execute("""
+            select c.conrelid::regclass::text, a.attname
+            from pg_constraint c
+            join pg_attribute a on a.attrelid = c.conrelid and a.attnum = c.conkey[1]
+            where c.contype = 'f'
+              and not exists (select 1 from pg_index i
+                              where i.indrelid = c.conrelid and i.indkey[0] = c.conkey[1])
+        """)
+        missing = cur.fetchall()
+    assert not missing, f"add an index for each foreign key: {missing}"
+```
+
+A parity test reads both sides and names the one to edit:
+
+```python
+import polib
+
+def test_every_language_has_every_message():
+    sv = {e.msgid for e in polib.pofile("locale/sv/LC_MESSAGES/django.po")}
+    en = {e.msgid for e in polib.pofile("locale/en/LC_MESSAGES/django.po")}
+    assert not sv - en, f"add to locale/en: {sorted(sv - en)}"
+    assert not en - sv, f"add to locale/sv: {sorted(en - sv)}"
+```
+
+## Exhaustive closed sets
+
+Model a closed set as an `Enum` and end each `match` with `assert_never`, so mypy fails until a new member is handled everywhere:
+
+```python
+from enum import Enum
+from typing import assert_never
+
+class Stage(Enum):
+    APPLIED = "applied"
+    INTERVIEW = "interview"
+    HIRED = "hired"
+
+def next_action(stage: Stage) -> str:
+    match stage:
+        case Stage.APPLIED: return "screen"
+        case Stage.INTERVIEW: return "schedule"
+        case Stage.HIRED: return "onboard"
+        case _: assert_never(stage)
+```
+
+## Pinned reference data
+
+Official tables live under `reference/<source>/` as JSON with the source URL and the date read at the top. A test loads the file and checks every value the product emits, so a wrong code fails before it reaches anyone outside.
 
 ## CI toolchain step
 

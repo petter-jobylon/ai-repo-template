@@ -6,7 +6,7 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 
 | Path | What |
 |---|---|
-| `.claude/skills/` | 20 skills from [mattpocock/skills](https://github.com/mattpocock/skills) (planning, tdd, review, debugging), 6 from [ponytail](https://github.com/DietrichGebert/ponytail) (always-on minimal-code mode), [impeccable](https://github.com/pbakaus/impeccable) (UI design), [playwright-cli](https://github.com/microsoft/playwright-cli) (screenshots), [linearis](https://github.com/linearis-oss/linearis) (Linear from the CLI), and the hand-written `next-step` and `add-baseline` |
+| `.claude/skills/` | 20 skills from [mattpocock/skills](https://github.com/mattpocock/skills) (planning, tdd, review, debugging), 6 from [ponytail](https://github.com/DietrichGebert/ponytail) (always-on minimal-code mode), [impeccable](https://github.com/pbakaus/impeccable) (UI design), [playwright-cli](https://github.com/microsoft/playwright-cli) (screenshots), [linearis](https://github.com/linearis-oss/linearis) (Linear from the CLI), and the hand-written `next-step`, `add-baseline`, `claim-sweep` and `write-domain-skill` |
 | `.claude/agents/`, `.claude/hooks/` | Impeccable's subagents, ponytail's hooks |
 | `.claude/settings.json` | Hook wiring |
 | `.claude/launch.json` | Empty; add your app's dev server |
@@ -17,7 +17,7 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 | `.github/pull_request_template.md` | First-principles answers, what is not live yet, Definition of Done |
 | `docs/agents/guardrails.md` | Every guardrail, where it lives, its strength, and whether this repo has adopted it |
 | `Makefile` | The one command interface (`make help`); CI, hooks and loops call only these targets, and an unfilled one fails |
-| `scripts/checks/` | Guard runner, guards (any language, contract in its `README.md`), fixtures that prove each guard can fail, baselines, `scripts/checks/patterns.json` |
+| `scripts/checks/` | Guard runner, guards (any language, contract in its `README.md`), fixtures that prove each guard can fail, baselines, `scripts/checks/patterns.json`, and `scripts/checks/db-test-required.json` (which files are migrations and which are real-store tests) |
 | `.github/workflows/ci.yml` | One job per make target, a zizmor job, and `ci-summary`, the one check to require |
 | `.github/actions/setup/` | The one CI step each repo fills in: its toolchain |
 | `.github/rulesets/main.json` | Ruleset to import: `ci-summary` required, code owner review, no force push |
@@ -38,14 +38,14 @@ Skills are vendored rather than installed as plugins because cloud sessions igno
 4. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed.
 5. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }`.
 6. UI repos: run `/impeccable init` for `PRODUCT.md`, and `/impeccable document` for `DESIGN.md` if the UI already exists.
-7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. `make check` passing locally is the bar.
+7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. Set the globs in `scripts/checks/db-test-required.json`, or its `n/a` to the reason this repo has no data store. `make check` passing locally is the bar.
 8. Fill in `.github/CODEOWNERS`, then import the ruleset: `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. It requires `ci-summary`, so a red CI blocks the merge.
 9. Go through `docs/agents/guardrails.md`: mark each guardrail `yes` or `n/a` under Adopted here as the repo takes it on.
 10. Try it: `/next-step` with a small change.
 
 ## This template repo's own CI
 
-The template's make targets are unfilled on purpose, so here CI runs `template-self-test` instead of the per-target jobs. That switch is the repository variable `TEMPLATE_SELF=true` (Settings, Secrets and variables, Actions, Variables), set only in this repo; adopting repos leave it unset.
+The template's make targets are unfilled on purpose, so here CI runs `template-self-test` instead of the per-target jobs. That switch is the repository variable `TEMPLATE_SELF=true` (Settings, Secrets and variables, Actions, Variables), set only in this repo; adopting repos leave it unset. Locally in this repo, run `TEMPLATE_SELF=true make guards`, so guards that need per-repo configuration report it as a note.
 
 ## Updating the skills
 

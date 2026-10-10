@@ -23,10 +23,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0 # guards that compare with the base branch need its history
       - uses: ./.github/actions/setup
       - run: make lint
       - run: make typecheck
       - run: make guards
+        env:
+          GUARD_BASE: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
       - run: make generate-check
 
   test:
@@ -85,6 +88,8 @@ jobs:
         with:
           node-version: 22
       - run: make guards
+        env:
+          TEMPLATE_SELF: ${{ vars.TEMPLATE_SELF }}
       - name: Unfilled targets fail loudly
         run: |
           if make lint 2>err.txt; then echo "make lint passed while unfilled"; exit 1; fi

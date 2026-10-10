@@ -6,7 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Hard rules
 
-<!-- The few invariants every change must keep, one numbered line each with its reason. End each with what enforces it: a check, a test or a database constraint, or "soft: no check yet". Promote a soft rule to a check once it has been skipped. -->
+1. **The data store enforces what must never break**: constraints, triggers, schema validation or permissions, with no exception for admin roles. A cache or queue never holds such a rule.
+2. **One way in per dangerous action** (money, permissions, deletion, anything posted or sent): one function or endpoint, and a guard or data-store rule refuses every other path.
+3. **Fail closed**: when a check that decides access or correctness can't run, refuse and say why. Failing open needs a visible trace.
+4. **Closed sets are exhaustive**: a new value fails the typecheck, or a test that enumerates the set, until every place handles it.
+5. **A fact lives in one place**: a second copy is generated from it (`make generate`), or a parity test reads both and names the side to edit.
+
+<!-- After each rule above, name what enforces it in this repo (a guard, a test, a constraint), or "soft: no check yet". Then add this repo's own invariants, one numbered line each with its reason. Promote a soft rule to a check once it has been skipped. -->
 
 ## Stop and ask
 
@@ -81,7 +87,7 @@ This file holds what every session needs; keep it under about 120 lines. A rule 
 
 ## Where the skills come from
 
-Everything under `.claude/skills/`, `.claude/agents/impeccable-*` and `.claude/hooks/ponytail-*` is vendored by `scripts/vendor-skills.sh` (see `skills-lock.json`); never edit those files, since a re-run replaces them. The hand-written skills are `next-step` (model-invoked on purpose so the agent can pick a flow itself) and `add-baseline`; their names stay out of `skills-lock.json`, so a re-vendor leaves them alone.
+Everything under `.claude/skills/`, `.claude/agents/impeccable-*` and `.claude/hooks/ponytail-*` is vendored by `scripts/vendor-skills.sh` (see `skills-lock.json`); never edit those files, since a re-run replaces them. The hand-written skills are the folders `skills-lock.json` doesn't list, among them `next-step` (model-invoked on purpose so the agent can pick a flow itself); a re-vendor leaves them alone and checks they survive.
 
 <!-- UI repos: "UI work follows DESIGN.md and PRODUCT.md", once Impeccable has written them. -->
 

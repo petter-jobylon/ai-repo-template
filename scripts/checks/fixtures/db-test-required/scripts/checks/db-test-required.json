@@ -1,0 +1,1 @@
+{ "migrations": ["migrations/**"], "tests": ["tests/db/**"], "n/a": null }
