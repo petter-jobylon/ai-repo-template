@@ -1,0 +1,12 @@
+# Paths agent docs may name before they exist. One per line; a trailing / covers a folder.
+docs/adr/                         # created on the first ADR (domain-modeling)
+docs/decisions/                   # created when the first month is archived
+CONTEXT.md                        # created on the first glossary term (domain-modeling)
+CONTEXT-MAP.md                    # multi-context repos only
+DESIGN.md                         # written by /impeccable
+PRODUCT.md                        # written by /impeccable
+docs/agents/issue-tracker.md      # written by /setup-matt-pocock-skills
+docs/agents/triage-labels.md      # written by /setup-matt-pocock-skills
+docs/agents/domain.md             # written by /setup-matt-pocock-skills
+.claude/settings.local.json       # personal, gitignored
+stop-hook-git-check.sh            # the cloud environment's own stop hook, outside the repo

@@ -27,9 +27,9 @@ Agents skip text rules that leave no trace. These items move what must hold into
 
 | Guardrail | When | Where | Strength | Template | Adopted here | Evidence in Accounted |
 |---|---|---|---|---|---|---|
-| Turn every must-hold rule into a CI gate | day one | `scripts/checks/` guard runner, `make guards` | hard | planned (PR 2) | not yet | a test rule held in 72% of commits as text and 246 of 246 as a gate |
+| Turn every must-hold rule into a CI gate | day one | `scripts/checks/` guard runner, `make guards` | hard | in place | not yet | a test rule held in 72% of commits as text and 246 of 246 as a gate |
 | Put rules that must never break in the database | day one | `.claude/rules/data.md`, stack recipe | hard | planned (PR 3) | not yet | ledger triggers with no role exception, added in the first week |
-| Give each dangerous action one way in | first month | pattern ratchet, `.claude/rules/` | hard | planned (PR 3) | not yet | one posting function; triggers refuse direct writes around it |
+| Give each dangerous action one way in | first month | pattern guard (`scripts/checks/patterns.json`), `.claude/rules/` | hard | planned (PR 3) | not yet | one posting function; triggers refuse direct writes around it |
 | Let the compiler force every case | first month | `.claude/rules/`, stack recipe | hard | planned (PR 3) | not yet | a typed map fails to compile until each new value has an entry |
 | Fail closed when a check cannot run | first month | `CLAUDE.md` § Hard rules, `.claude/rules/` | soft | planned (PR 3) | not yet | a swallowed query error was read as 'open' on three paths |
 
@@ -41,20 +41,20 @@ Mocks accept any query, so a change can pass every unit test and still be wrong 
 |---|---|---|---|---|---|---|
 | Add a real-database test layer early | day one | `make test-db`, `.claude/rules/tests.md`, stack recipe | hard | planned (PR 3) | not yet | 364 real-Postgres test files; mocks let a dropped trigger ship green |
 | Write tests that sweep the whole set | first month | catalog sweep tests, stack recipe | hard | planned (PR 3) | not yet | about 85 test files sweep the database catalog |
-| Prove every check can fail | first month | guard runner self-tests, `scripts/checks/fixtures/` | hard | planned (PR 2) | not yet | a test layer passed green while exercising nothing, twice |
+| Prove every check can fail | first month | guard runner self-tests, `scripts/checks/fixtures/` | hard | in place | not yet | a test layer passed green while exercising nothing, twice |
 
-## Ratchets, guard scripts and drift checks
+## Guard scripts, baselines and drift checks
 
-A ratchet is a check that fails new violations and lets old ones stay. These scripts stop agents repeating old mistakes and stop copies of a fact drifting apart.
+A guard with a baseline fails new violations and lets old ones stay. These scripts stop agents repeating old mistakes and stop copies of a fact drifting apart.
 
 | Guardrail | When | Where | Strength | Template | Adopted here | Evidence in Accounted |
 |---|---|---|---|---|---|---|
-| Run lint and typecheck in CI from day one | day one | `make lint`, `make typecheck`, CI workflow | hard | planned (PR 2) | not yet | lint was never wired into CI and about 60 errors piled up |
-| Adopt strict rules with a ratchet and baseline | first month | `scripts/checks/baselines/`, `patterns.yml`, `add-ratchet` skill | hard | planned (PR 2) | not yet | 2 raises in 46 baseline changes; route auth went from 171 files to 1 |
-| Make every failure message print the fix | day one | guard contract (`scripts/checks/README.md`) | hard | planned (PR 2) | not yet | guards print the lines to add; database refusals name the lawful path |
+| Run lint and typecheck in CI from day one | day one | `make lint`, `make typecheck`, CI workflow | hard | in place | not yet | lint was never wired into CI and about 60 errors piled up |
+| Adopt strict rules with a baseline | first month | `scripts/checks/baselines/`, `scripts/checks/patterns.json`, `add-baseline` skill | hard | in place | not yet | 2 raises in 46 baseline changes; route auth went from 171 files to 1 |
+| Make every failure message print the fix | day one | guard contract (`scripts/checks/README.md`) | hard | in place | not yet | guards print the lines to add; database refusals name the lawful path |
 | Generate copies and fail CI when stale | first month | `make generate`, `make generate-check` | hard | planned (PR 3) | not yet | hand-kept crontabs had lost 7 of 16 jobs |
 | Test both sides when code cannot be shared | as you grow | `.claude/rules/tests.md`, stack recipe | hard | planned (PR 3) | not yet | one bank match booked a different voucher through each way in |
-| Sweep agent instructions for stale claims regularly | first month | `instruction-refs` guard (PR 2), `claim-sweep` skill (PR 3) | hard + process | planned (PR 2) | not yet | a sweep found 28 stale claims across 279 agent files, none caught |
+| Sweep agent instructions for stale claims regularly | first month | `instruction-refs` guard; `claim-sweep` skill (planned, PR 3) | hard + process | in place | not yet | a sweep found 28 stale claims across 279 agent files, none caught |
 
 ## CI and the merge
 
@@ -62,11 +62,11 @@ CI is the first place a coding agent's change is refused. It protects main only 
 
 | Guardrail | When | Where | Strength | Template | Adopted here | Evidence in Accounted |
 |---|---|---|---|---|---|---|
-| Require passing checks before merge | day one | `.github/rulesets/main.json`, README step | hard | planned (PR 2) | not yet | no required check; 8 PRs merged with red CI in 30 days |
-| Add one always-run job that sums up CI | day one | CI workflow `ci-summary` job | hard | planned (PR 2) | not yet | a skipped required check counts as passing |
-| Lock down the CI supply chain | day one | SHA-pinned actions, job permissions, workflow scanner | hard | planned (PR 2) | not yet | all 56 external actions SHA-pinned after an action was exploited |
-| Keep a checked list of pinned dependencies | first month | `docs/agents/pinned-deps.md`, `pinned-deps` guard | hard | planned (PR 2) | not yet | one dependency bump took down two features |
-| Build every shipped configuration in PR CI | as you grow | CI workflow `make build` per shipped configuration | hard | planned (PR 2) | not yet | an image build failed after merge in 16 publish runs |
+| Require passing checks before merge | day one | `.github/rulesets/main.json`, README step | hard | in place | not yet | no required check; 8 PRs merged with red CI in 30 days |
+| Add one always-run job that sums up CI | day one | CI workflow `ci-summary` job | hard | in place | not yet | a skipped required check counts as passing |
+| Lock down the CI supply chain | day one | SHA-pinned actions, `workflow-pins` guard, zizmor job | hard | in place | not yet | all 56 external actions SHA-pinned after an action was exploited |
+| Keep a checked list of pinned dependencies | first month | `docs/agents/pinned-deps.md`, `pinned-deps` guard | hard | in place | not yet | one dependency bump took down two features |
+| Build every shipped configuration in PR CI | as you grow | CI workflow `build` job (`make build`) | hard | in place | not yet | an image build failed after merge in 16 publish runs |
 
 ## Review and human decisions
 
@@ -76,8 +76,8 @@ A second model catches what the author agent misses, and some calls belong to pe
 |---|---|---|---|---|---|---|
 | Record what happened to each AI review finding | first month | `CLAUDE.md` § Decisions, `next-step` review step | soft | in place | not yet | about 54 declines logged, 21 of them naming a review bot |
 | Run an adversarial second-agent pass before the PR | as you grow | `skeptic-pass` skill | process | planned (PR 4) | not yet | skeptic passes in 140 commits; counterexamples became tests |
-| Assign human reviewers to the guardrail files | first month | `.github/CODEOWNERS` | hard | planned (PR 2) | not yet | no CODEOWNERS; both baseline raises went unexplained |
-| Make production scripts dry-run by default | first month | `.claude/rules/prod-scripts.md`, script template | soft | planned (PR 2) | not yet | a repair script needs the hash of its reviewed dry run |
+| Assign human reviewers to the guardrail files | first month | `.github/CODEOWNERS` | hard | in place | not yet | no CODEOWNERS; both baseline raises went unexplained |
+| Make production scripts dry-run by default | first month | `.claude/rules/prod-scripts.md`, recipe example | soft | in place | not yet | a repair script needs the hash of its reviewed dry run |
 | Track escalated decisions until someone resolves them | as you grow | `CLAUDE.md` § Decisions (ESCALATED / RESOLVED) | soft | in place | not yet | 39 of 72 parked founder calls show no resolution |
 
 ## Domain knowledge
@@ -99,7 +99,7 @@ Scheduled agents (loops) and parallel sessions can overreach, collide or never s
 |---|---|---|---|---|---|---|
 | Let loops propose and never merge | as you grow | `.claude/loops.md` | soft | planned (PR 4) | not yet | loops open PRs and never merge; risky areas are ticket-only |
 | Check at session start that every loop runs | as you grow | `loop-ignite` skill, SessionStart hook | process | planned (PR 4) | not yet | 'check the pr comments' was typed 323 times before loops existed |
-| Make local checks call the same scripts as CI | as you grow | Makefile targets shared by CI, hooks and loops | hard | planned (PR 2) | not yet | a hand-copied loop check greps moved folders and never fires |
+| Make local checks call the same scripts as CI | as you grow | `Makefile` targets shared by CI, hooks and loops | hard | in place | not yet | a hand-copied loop check greps moved folders and never fires |
 | Give each parallel agent its own worktree | as you grow | `next-step`, `.claude/loops.md` | process | planned (PR 4) | not yet | shared checkouts corrupted commits across sessions |
 
 ## Memory and learning from incidents
@@ -110,7 +110,7 @@ Agents keep no memory between sessions, so the repo has to. These items record w
 |---|---|---|---|---|---|---|
 | Keep a one-line decision log in the repo | day one | `DECISIONS.md`, `CLAUDE.md` § Decisions | soft | in place | not yet | 2,521 entries in three months; 41% name a rejected option |
 | Ship fix, class guard and log line together | day one | `guardrail-from-incident` skill, `next-step` Bug flow | process | planned (PR 4) | not yet | 22 of 23 guards shipped in the fix's own PR |
-| Sweep for every sibling of a defect | as you grow | `sibling-sweep` skill | process | planned (PR 4) | not yet | one sweep: about 150 findings, 28 defects, three new ratchets |
+| Sweep for every sibling of a defect | as you grow | `sibling-sweep` skill | process | planned (PR 4) | not yet | one sweep: about 150 findings, 28 defects, three new baseline guards |
 | Commit the agent setup the team depends on | day one | `CLAUDE.md` § Workflow, `.gitignore` | soft | in place | not yet | only 4 of 10 working methods were in the repo |
 
 ## Guardrails for the product's own AI agents

@@ -14,7 +14,9 @@ Stop and ask; do not guess. <!-- The areas where a wrong guess is expensive (e.g
 
 ## Commands
 
-<!-- The commands an agent runs, from the repo root: install, full test suite, one test, lint/typecheck. -->
+`make help` lists the targets (`setup`, `check`, `lint`, `typecheck`, `test`, `test-db`, `guards`, `generate`, `generate-check`, `build`). CI, hooks and loops call only these, so a target's body is the one place a command lives.
+
+<!-- Commands make doesn't cover, from the repo root: how to run one test while iterating. -->
 <!-- Preview (used by /next-step's screenshot step): the one command that serves the app locally with demo data, and its URL. Delete this line if the repo has no UI. -->
 
 ## Architecture
@@ -41,7 +43,7 @@ When the chosen path differs from the one the issue proposed, log it (§ Decisio
 
 A change is done when all of these hold; iterate until they do:
 
-1. The full check from § Commands passes: lint, typecheck and the test suite.
+1. `make check` passes: lint, typecheck, tests, real-data-store tests, guards, generated files and build.
 2. New or changed behaviour has tests at the seams in § Tests.
 3. Every rule, guard and agent doc the change made stale is updated in the same change.
 4. Each non-obvious choice has its line in `DECISIONS.md` (§ Decisions).
@@ -59,7 +61,7 @@ The ADR criteria decide which tier a choice goes in; a choice that misses them g
 
 ## Rules
 
-This file holds what every session needs; keep it under about 120 lines. A rule that applies to part of the tree lives in `.claude/rules/<area>.md`, which loads automatically when a file matching its `paths:` header is touched. Each rule has one home: here or in one rule file. `AGENTS.md` and other docs link to it.
+This file holds what every session needs; keep it under about 120 lines. A rule that applies to part of the tree lives in `.claude/rules/<area>.md`, which loads automatically when a file matching its `paths:` header is touched. Each rule has one home: here or in one rule file. `AGENTS.md` and other docs link to it. A rule that must always hold gets a guard in `scripts/checks/` (contract in its `README.md`, steps in the `add-baseline` skill), and its failure message names the fix.
 
 <!-- One line per rule file: `.claude/rules/<area>.md`: what it covers (the paths it loads for). Delete rule files this repo doesn't need. -->
 
@@ -79,7 +81,7 @@ This file holds what every session needs; keep it under about 120 lines. A rule 
 
 ## Where the skills come from
 
-Everything under `.claude/skills/`, `.claude/agents/impeccable-*` and `.claude/hooks/ponytail-*` is vendored by `scripts/vendor-skills.sh` (see `skills-lock.json`); never edit those files, since a re-run replaces them. Only `next-step` is hand-written, and it is model-invoked on purpose so the agent can pick a flow itself.
+Everything under `.claude/skills/`, `.claude/agents/impeccable-*` and `.claude/hooks/ponytail-*` is vendored by `scripts/vendor-skills.sh` (see `skills-lock.json`); never edit those files, since a re-run replaces them. The hand-written skills are `next-step` (model-invoked on purpose so the agent can pick a flow itself) and `add-baseline`; their names stay out of `skills-lock.json`, so a re-vendor leaves them alone.
 
 <!-- UI repos: "UI work follows DESIGN.md and PRODUCT.md", once Impeccable has written them. -->
 

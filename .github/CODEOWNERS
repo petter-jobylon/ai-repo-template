@@ -1,0 +1,10 @@
+# Guardrail files need an owner's approval (the ruleset turns on code owner review).
+# Replace @OWNER with a user or team and uncomment the lines this repo uses.
+# /scripts/checks/        @OWNER
+# /.github/               @OWNER
+# /.claude/rules/         @OWNER
+# /.claude/settings.json  @OWNER
+# /CLAUDE.md              @OWNER
+# /AGENTS.md              @OWNER
+# /Makefile               @OWNER
+# /<migrations folder>/   @OWNER

@@ -67,6 +67,7 @@ A flow's state lives in the tracker (`docs/agents/issue-tracker.md`) and git, ne
 | A new part inside an existing page | New component |
 | Spacing, type, colour, motion or copy | Visual tweak |
 | Tidying structure or finding what to delete | Code health |
+| Changing a guard, baseline, pattern, rule file, CI workflow or ruleset | Guardrail change |
 | Too big or foggy to plan in one session | Huge effort |
 | Mid-merge or mid-rebase; a question to research; editing a skill, `CLAUDE.md` or a rule file | One-skill flows |
 
@@ -158,9 +159,19 @@ No tickets, and no new test unless the rendered content changes.
 ### Code health
 
 ```
-- [ ] improve-codebase-architecture (structure) or ponytail-audit (what to delete)
+- [ ] improve-codebase-architecture (structure), ponytail-audit (what to delete) or add-baseline (a rule that keeps being broken)
 - [ ] pick one ⏸
 - [ ] a deepening pick is grilled inside improve-codebase-architecture itself → to-spec (Feature) or branch → implement (Small change); a deletion → Small change
+```
+
+### Guardrail change
+
+```
+- [ ] branch
+- [ ] the change, with its failure message naming the fix and its fixture or failing_example; make guards shows the self-test PASS
+- [ ] a baseline only shrinks (`--shrink`); a raise gets a DECISIONS.md line with the reason ⏸
+- [ ] the rule's § Enforced by (or CLAUDE.md § Hard rules) names the guard
+- [ ] review → commit ⏸ → pr ⏸; code owners review it (.github/CODEOWNERS)
 ```
 
 ### Huge effort
@@ -199,7 +210,7 @@ Ponytail's hooks have two quirks; tell the user when they bite:
 - **Building**: `implement` (per ticket, test-first, closes with review), `tdd` (red-green at the agreed seams), `code-review` (Standards and Spec axes against a fixed point), `pr` (the PR body).
 - **Debugging**: `diagnosing-bugs` (feedback loop first, then a regression test), `resolving-merge-conflicts` (by intent; never `--abort`).
 - **UI**: `impeccable` (the design workflow, briefed by `PRODUCT.md` from `impeccable init` and `DESIGN.md` from `impeccable document` or new-work; `live` is local-only), `playwright-cli` (open pages served by the preview command and screenshot them).
-- **Code health**: `improve-codebase-architecture` (deepening opportunities), `codebase-design` (deep-module vocabulary), `domain-modeling` (sharpen a `CONTEXT.md` term or record an ADR), `ponytail-review` (over-engineering in a diff), `ponytail-audit` (in the whole repo), `ponytail-debt` (every `ponytail:` comment), `ponytail`, `ponytail-help`, `ponytail-gain` (the always-on lazy mode, its command card, its benchmarks).
+- **Code health**: `improve-codebase-architecture` (deepening opportunities), `codebase-design` (deep-module vocabulary), `domain-modeling` (sharpen a `CONTEXT.md` term or record an ADR), `add-baseline` (adopt a strict rule with a baseline that only shrinks), `ponytail-review` (over-engineering in a diff), `ponytail-audit` (in the whole repo), `ponytail-debt` (every `ponytail:` comment), `ponytail`, `ponytail-help`, `ponytail-gain` (the always-on lazy mode, its command card, its benchmarks).
 - **Research and writing**: `research` (cited Markdown from primary sources), `writing-for-agents` (skills, `CLAUDE.md`, agent docs).
 - **Session**: `wait-what` (re-explain the last message), `handoff` (a handoff document for another agent or directory).
 - **Setup**: `setup-matt-pocock-skills` (tracker, triage labels, doc layout into `docs/agents/`; run once when adopting this template).
