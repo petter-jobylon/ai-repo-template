@@ -3,7 +3,7 @@
 # so CI never passes while checking nothing. A target that does not apply here becomes
 # `@echo "n/a: <reason>"`, which records the choice.
 .DEFAULT_GOAL := help
-.PHONY: help setup check lint typecheck test test-db guards generate generate-check build
+.PHONY: help setup up down seed check lint typecheck test test-db guards generate generate-check build
 
 unconfigured = @echo "make $(1): not configured yet. Fill in this target for your stack (docs/agents/recipes/)." >&2; exit 1
 
@@ -12,6 +12,15 @@ help: ## List the targets
 
 setup: ## Install dependencies and tools
 	$(call unconfigured,setup)
+
+up: ## Start the app with its services and migrations applied (agents run it in the background)
+	$(call unconfigured,up)
+
+down: ## Stop what `make up` started
+	$(call unconfigured,down)
+
+seed: ## Load demo data into the local app (never a copy of production)
+	$(call unconfigured,seed)
 
 lint: ## Lint and format check
 	$(call unconfigured,lint)

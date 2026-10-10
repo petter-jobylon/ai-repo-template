@@ -2,7 +2,7 @@
 
 Every guardrail this template carries, where it lives and how strong it is. Each comes from the public repo
 [erp-mafia/accounted](https://github.com/erp-mafia/accounted), a Swedish accounting SaaS that AI agents almost
-entirely coded; the evidence column says what happened there.
+entirely coded; the evidence column says what happened there. The last group covers cloud sessions.
 
 - **Strength**: hard means a check, test or the data store refuses; soft means an instruction the agent should follow; process means a skill or flow step.
 - **Template**: `in place`, or the planned PR that adds it.
@@ -125,3 +125,16 @@ Use these only if the product exposes AI agents to customers. They protect again
 | Give agents stable error codes and a retry flag | product agents | `.claude/rules/agent-tools.md` rule 4 | hard | in place | not yet | 645 of 1,024 agent tool failures were UNKNOWN_ERROR |
 | Record who approved and through which way in | product agents | `.claude/rules/agent-tools.md` rule 5 | hard | in place | not yet | web approvals left no processing-history event |
 | Gate every way in and check the list | product agents | `.claude/rules/agent-tools.md` rule 6, stack recipe | hard | in place | not yet | the agent path bypassed the paywall one day after launch |
+
+## Cloud sessions and secrets
+
+These come from running agents in Claude Code cloud sessions, not from Accounted.
+
+| Guardrail | When | Where | Strength | Template | Adopted here | Why |
+|---|---|---|---|---|---|---|
+| Make targets work without hooks | day one | `scripts/ensure-docker.sh`, `CLAUDE.md` § Workflow | hard | in place | not yet | a session with more than one repo runs no repo's hooks |
+| Keep env blocks out of committed settings | day one | `.claude/settings.json`, `scripts/vendor-skills.sh` | soft | in place | not yet | self-hosted runners flag one and refuse the session in enforce mode |
+| Put slow setup in the environment's setup script | first month | `scripts/cloud-env-setup.sh` | process | in place | not yet | a short setup script is cached between sessions; hooks run every session |
+| Boot the app with one command and seed data | first month | `make up`, `make seed`, `.env.example`, stack recipe | soft | in place | not yet | an agent can only run and screenshot an app that boots with one command |
+| Write down what agents can reach | first month | `docs/agents/agent-access.md` | soft | in place | not yet | without it an agent guesses where logs and errors live, or gives up |
+| Keep secrets out of the repo | day one | `CLAUDE.md` § Hard rules 6, `no-committed-secrets` guard | hard | in place | not yet | anything in a cloud environment can be read by everyone who uses it |

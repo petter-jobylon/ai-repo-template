@@ -26,7 +26,11 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 | `docs/agents/pinned-deps.md` | Exact pins with reasons, checked by a guard |
 | `docs/agents/recipes/` | How to fill each stack slot; today Python, Django, PostgreSQL and Redis |
 | `scripts/vendor-skills.sh` | Re-vendors every third-party skill to latest and self-tests the hooks |
-| `scripts/cloud-tools.sh` | Cloud sessions only: installs `playwright-cli` and `linearis`, and trusts the egress proxy's CAs |
+| `scripts/cloud-tools.sh` | Cloud sessions only: installs `playwright-cli` and `linearis`, trusts the egress proxy's CAs, and starts Docker |
+| `scripts/ensure-docker.sh` | Starts the Docker daemon in a cloud session if it is down; make targets call it, so they work without hooks |
+| `scripts/cloud-env-setup.sh` | Sample for a cloud environment's setup script: toolchain and Docker images, cached between sessions |
+| `.env.example` | Local settings with working defaults; `.env` itself is gitignored |
+| `docs/agents/agent-access.md` | How agents reach tickets, logs, errors and metrics, and what they may not touch |
 | `scripts/impeccable-scope.js` | Tells ponytail to leave design completeness to Impeccable |
 
 Skills are vendored rather than installed as plugins because cloud sessions ignore plugins a repo declares.
@@ -37,12 +41,19 @@ Skills are vendored rather than installed as plugins because cloud sessions igno
 2. Fill in `CLAUDE.md`: every `<!-- -->` prompt, then delete the prompts. Keep the section names: `next-step` refers to § Stop and ask, § Commands, § Tests, § Definition of Done, § Decisions, § Workflow and § Where the skills come from.
 3. Fill in the `.claude/rules/` files this repo needs (their `paths:` globs and conventions) and delete the rest; list the ones you keep in `CLAUDE.md` § Rules.
 4. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed.
-5. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }`.
+5. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "make", "runtimeArgs": ["up"], "port": 8000 }`.
 6. UI repos: run `/impeccable init` for `PRODUCT.md`, and `/impeccable document` for `DESIGN.md` if the UI already exists.
 7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. Set the globs in `scripts/checks/db-test-required.json`, or its `n/a` to the reason this repo has no data store. `make check` passing locally is the bar.
 8. Fill in `.github/CODEOWNERS`, then import the ruleset: `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. It requires `ci-summary`, so a red CI blocks the merge.
 9. Go through `docs/agents/guardrails.md`: mark each guardrail `yes` or `n/a` under Adopted here as the repo takes it on.
 10. Try it: `/next-step` with a small change.
+
+## Cloud sessions
+
+- **Setup script vs hook.** Slow, rarely changing steps (toolchain, Docker images) go in the cloud environment's setup script; start from `scripts/cloud-env-setup.sh`. Fast per-session steps stay in the SessionStart hook (`scripts/cloud-tools.sh`).
+- **Hooks don't run in a session with more than one repo.** Nothing that must happen depends on a hook: the make targets start Docker themselves, and CI runs the guards.
+- **No `env` block in `.claude/settings.json`.** Self-hosted runners flag one, and refuse the session in enforce mode, so settings that hooks need ride on the hook command instead.
+- **Secrets.** A token in a cloud environment can be read by everyone who uses that environment, so keep to low-risk, tightly scoped tokens. The `no-committed-secrets` guard fails on secrets in the repo.
 
 ## This template repo's own CI
 

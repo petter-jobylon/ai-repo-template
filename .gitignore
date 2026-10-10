@@ -25,3 +25,8 @@ storage-state-*.json
 .impeccable/live/deferred-svelte-component-accepts.json
 .impeccable/live/*.png
 # impeccable-ignore-end
+
+# Local environment files; .env.example is the committed template
+.env
+.env.*
+!.env.example

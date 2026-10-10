@@ -8,6 +8,19 @@ How to fill the template's stack slots for a Django app with PostgreSQL as the s
 setup: ## Install dependencies and tools
 	uv sync --frozen
 
+up: ## Start the app with its services and migrations applied
+	scripts/ensure-docker.sh
+	[ -f .env ] || cp .env.example .env
+	docker compose up -d --wait
+	uv run --env-file .env python manage.py migrate
+	uv run --env-file .env python manage.py runserver 0.0.0.0:8000
+
+down: ## Stop what `make up` started
+	docker compose down
+
+seed: ## Load demo data into the local app
+	uv run --env-file .env python manage.py loaddata seed/demo.json
+
 lint: ## Lint and format check
 	uv run ruff check .
 	uv run ruff format --check .
@@ -29,6 +42,7 @@ build: ## Build every configuration this repo ships
 	uv run python manage.py check --deploy
 
 test-db: ## Tests against the real data stores
+	scripts/ensure-docker.sh
 	docker compose -f compose.test.yml -p $(notdir $(CURDIR))-test up -d --wait
 	DATABASE_URL=postgres://postgres:test@127.0.0.1:55432/app_test REDIS_URL=redis://127.0.0.1:56379/0 \
 	  uv run pytest -m db; status=$$?; \
@@ -36,6 +50,37 @@ test-db: ## Tests against the real data stores
 ```
 
 The test settings read `DATABASE_URL` and `REDIS_URL` (for example with `dj-database-url`). pytest-django builds the test database from every migration, so each run replays the schema from empty.
+
+## compose.yml and .env.example (local app)
+
+```yaml
+# Local stores for `make up`. Same mirror as compose.test.yml.
+services:
+  postgres:
+    image: mirror.gcr.io/library/postgres:16-alpine
+    environment: { POSTGRES_PASSWORD: dev, POSTGRES_DB: app }
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck: { test: ["CMD", "pg_isready", "-U", "postgres"], interval: 1s, retries: 30 }
+  redis:
+    image: mirror.gcr.io/library/redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 1s, retries: 30 }
+volumes:
+  pgdata:
+```
+
+Lines for `.env.example`, each a working local default:
+
+```sh
+DATABASE_URL=postgres://postgres:dev@127.0.0.1:5432/app
+REDIS_URL=redis://127.0.0.1:6379/0
+DJANGO_SECRET_KEY=local-only-not-secret
+DEBUG=1
+ENVIRONMENT=local
+```
+
+Seed data is a fixture built for demos (`seed/demo.json`), never an export of production.
 
 ## compose.test.yml
 
@@ -156,6 +201,20 @@ def test_every_api_view_is_gated_or_listed_free():
         and AllowAny in p.callback.cls.permission_classes
     ]
     assert not open_views, f"gate these views, or add them to FREE with a reason: {open_views}"
+```
+
+## Cloud environment setup script
+
+In `scripts/cloud-env-setup.sh`, fill the two steps:
+
+```bash
+# 1. Toolchain
+pip install --quiet uv
+uv python install 3.12
+
+# 2. Docker images
+  docker pull mirror.gcr.io/library/postgres:16-alpine
+  docker pull mirror.gcr.io/library/redis:7-alpine
 ```
 
 ## CI toolchain step

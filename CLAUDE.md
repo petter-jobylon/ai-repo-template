@@ -11,19 +11,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. **Fail closed**: when a check that decides access or correctness can't run, refuse and say why. Failing open needs a visible trace.
 4. **Closed sets are exhaustive**: a new value fails the typecheck, or a test that enumerates the set, until every place handles it.
 5. **A fact lives in one place**: a second copy is generated from it (`make generate`), or a parity test reads both and names the side to edit.
+6. **Secrets stay out of the repo**: none in code, committed settings or `.env` files (only `.env.example`), and cloud environments hold only low-risk, tightly scoped tokens. Enforced by the `no-committed-secrets` guard.
 
 <!-- After each rule above, name what enforces it in this repo (a guard, a test, a constraint), or "soft: no check yet". Then add this repo's own invariants, one numbered line each with its reason. Promote a soft rule to a check once it has been skipped. -->
 
 ## Stop and ask
 
-Stop and ask; do not guess. <!-- The areas where a wrong guess is expensive (e.g. production data, money, auth, legal rules) and who decides each. -->
+Stop and ask; do not guess. How agents reach tickets, logs, errors and metrics, and what they may not touch there: `docs/agents/agent-access.md`. <!-- The areas where a wrong guess is expensive (e.g. production data, money, auth, legal rules) and who decides each. -->
 
 ## Commands
 
 `make help` lists the targets (`setup`, `check`, `lint`, `typecheck`, `test`, `test-db`, `guards`, `generate`, `generate-check`, `build`). CI, hooks and loops call only these, so a target's body is the one place a command lives.
 
 <!-- Commands make doesn't cover, from the repo root: how to run one test while iterating. -->
-<!-- Preview (used by /next-step's screenshot step): the one command that serves the app locally with demo data, and its URL. Delete this line if the repo has no UI. -->
+`make up` serves the app with its services and migrations applied (run it in the background), and `make seed` loads demo data. <!-- The URL `make up` serves, used by /next-step's screenshot step. Delete this line if the repo has no UI. -->
 
 ## Architecture
 
@@ -78,6 +79,7 @@ This file holds what every session needs; keep it under about 120 lines. A rule 
 <!-- What deploys the default branch, if anything. -->
 
 - Shared agent setup lives in the repo: settings, hooks, skills, rules and plans. A method the team relies on gets committed as one of those; personal settings stay in `.claude/settings.local.json`.
+- A session with more than one repo runs no repo's hooks. The make targets and CI never depend on a hook, so run them directly.
 - Scheduled agents (loops) follow `.claude/loops.md`: they propose and never merge, each in its own worktree.
 - Guardrail work outranks ponytail: a test, check, rule update or `DECISIONS.md` line that the Definition of Done, a rule or a guard requires is part of the change. Ponytail decides how much product code to write.
 - Mark deliberate shortcuts with a `ponytail:` comment naming the limit and the upgrade path.

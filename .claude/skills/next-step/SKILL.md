@@ -38,7 +38,7 @@ The flows below name these:
 - **review**: `code-review` against `git merge-base origin/<default branch> HEAD`. The work is not committed yet, so diff the working tree (`git diff <merge-base>`), not `...HEAD`. Give it the ticket or spec as the spec, and `CLAUDE.md`, every `.claude/rules/` file whose `paths:` match the diff (plus `DESIGN.md` if the repo has one) as the standards. Fix what it finds that holds up; list anything you disagree with for the user, and give each finding you decline its `DECISIONS.md` line with the reason.
 - **commit ⏸**: before the gate, walk `CLAUDE.md` § Definition of Done item by item and show the result; every item holds, or you name the one that doesn't and why.
 - **pr ⏸**: `pr` writes the body, filling every section of `.github/pull_request_template.md`: the three first-principles answers and what is not live yet. The PR names every ticket it closes, with the tracker's closing keyword (`docs/agents/issue-tracker.md`).
-- **screenshot**: start the preview command from `CLAUDE.md` § Commands in the background, then `playwright-cli` at the widths the change can reach (390px phone, 1280px desktop; a change scoped to one breakpoint needs only that width). Save any login state only as `.playwright-cli/<name>.json`.
+- **screenshot**: start `make up` in the background (`make seed` first if the page needs data; the URL is in `CLAUDE.md` § Commands), then `playwright-cli` at the widths the change can reach (390px phone, 1280px desktop; a change scoped to one breakpoint needs only that width). Save any login state only as `.playwright-cli/<name>.json`.
 
 ## Tickets and resuming
 
