@@ -78,7 +78,7 @@ This file holds what every session needs; keep it under about 120 lines. A rule 
 
 ## Where the skills come from
 
-Everything under `.claude/skills/`, `.claude/agents/impeccable-*` and `.claude/hooks/ponytail-*` is vendored by `scripts/vendor-skills.sh` (see `skills-lock.json`); never edit those files, since a re-run replaces them. The hand-written skills are the folders `skills-lock.json` doesn't list, among them `next-step` (model-invoked on purpose so the agent can pick a flow itself); a re-vendor leaves them alone and checks they survive.
+Everything under `.claude/skills/`, `.claude/agents/impeccable-*` and `.claude/hooks/ponytail-*` is vendored by `scripts/vendor-skills.sh` (see `skills-lock.json`); never edit those files, since a re-run replaces them. The hand-written skills are the folders `skills-lock.json` doesn't list, among them `next-step` (model-invoked on purpose so the agent can pick a flow itself); a re-vendor leaves them alone.
 
 <!-- UI repos: "UI work follows DESIGN.md and PRODUCT.md", once Impeccable has written them. -->
 

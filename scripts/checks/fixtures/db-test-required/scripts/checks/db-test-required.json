@@ -1,1 +1,1 @@
-{ "migrations": ["migrations/**"], "tests": ["tests/db/**"], "n/a": null }
+{ "migrations": ["migrations/**"], "tests": ["tests/db/**"] }

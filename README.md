@@ -6,7 +6,7 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 
 | Path | What |
 |---|---|
-| `.claude/skills/` | 20 skills from [mattpocock/skills](https://github.com/mattpocock/skills) (planning, tdd, review, debugging), 6 from [ponytail](https://github.com/DietrichGebert/ponytail) (always-on minimal-code mode), [impeccable](https://github.com/pbakaus/impeccable) (UI design), [playwright-cli](https://github.com/microsoft/playwright-cli) (screenshots), [linearis](https://github.com/linearis-oss/linearis) (Linear from the CLI), and the hand-written `next-step`, `add-baseline`, `claim-sweep` and `write-domain-skill` |
+| `.claude/skills/` | 20 skills from [mattpocock/skills](https://github.com/mattpocock/skills) (planning, tdd, review, debugging), 6 from [ponytail](https://github.com/DietrichGebert/ponytail) (always-on minimal-code mode), [impeccable](https://github.com/pbakaus/impeccable) (UI design), [playwright-cli](https://github.com/microsoft/playwright-cli) (screenshots), [linearis](https://github.com/linearis-oss/linearis) (Linear from the CLI), and the hand-written `next-step`, `add-baseline` and `claim-sweep` |
 | `.claude/agents/`, `.claude/hooks/` | Impeccable's subagents, ponytail's hooks |
 | `.claude/settings.json` | Hook wiring |
 | `.claude/launch.json` | Empty; add your app's dev server |
@@ -22,6 +22,7 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 | `.github/actions/setup/` | The one CI step each repo fills in: its toolchain |
 | `.github/rulesets/main.json` | Ruleset to import: `ci-summary` required, code owner review, no force push |
 | `.github/CODEOWNERS` | Owners for guardrail files (fill in) |
+| `docs/agents/optional/` | Opt-in pieces to copy in when they apply: `docs/agents/optional/write-domain-skill/` into `.claude/skills/` when agents need facts set by law, tax or a standard |
 | `docs/agents/recipes/` | How to fill each stack slot; today Python, Django, PostgreSQL and Redis |
 | `scripts/vendor-skills.sh` | Re-vendors every third-party skill to latest and self-tests the hooks |
 | `scripts/cloud-tools.sh` | Cloud sessions only: installs `playwright-cli` and `linearis`, and trusts the egress proxy's CAs |
@@ -37,7 +38,7 @@ Skills are vendored rather than installed as plugins because cloud sessions igno
 4. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed.
 5. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }`.
 6. UI repos: run `/impeccable init` for `PRODUCT.md`, and `/impeccable document` for `DESIGN.md` if the UI already exists.
-7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. Set the globs in `scripts/checks/db-test-required.json`, or its `n/a` to the reason this repo has no data store. `make check` passing locally is the bar.
+7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. To require a real-store test with each migration, add `scripts/checks/db-test-required.json` (the recipe has one). `make check` passing locally is the bar.
 8. Fill in `.github/CODEOWNERS`, then import the ruleset: `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. It requires `ci-summary`, so a red CI blocks the merge.
 9. Go through `docs/agents/guardrails.md`: mark each guardrail `yes` or `n/a` under Adopted here as the repo takes it on.
 10. Try it: `/next-step` with a small change.

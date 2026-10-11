@@ -29,6 +29,7 @@ build: ## Build every configuration this repo ships
 	uv run python manage.py check --deploy
 
 test-db: ## Tests against the real data stores
+	scripts/ensure-docker.sh
 	docker compose -f compose.test.yml -p $(notdir $(CURDIR))-test up -d --wait
 	DATABASE_URL=postgres://postgres:test@127.0.0.1:55432/app_test REDIS_URL=redis://127.0.0.1:56379/0 \
 	  uv run pytest -m db; status=$$?; \
@@ -55,7 +56,24 @@ services:
     healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 1s, retries: 30 }
 ```
 
-Match the image versions to production. In a cloud session the `scripts/cloud-tools.sh` hook starts the Docker daemon if it is stopped; putting `docker compose -f compose.test.yml pull` in the environment's setup script caches the images between sessions.
+Match the image versions to production. Putting `docker compose -f compose.test.yml pull` in the cloud environment's setup script caches the images between sessions.
+
+## Docker in cloud sessions
+
+Some cloud images ship the Docker daemon stopped, and a session with more than one repo runs no repo's hooks, so the targets that need Docker start it themselves. `scripts/ensure-docker.sh`:
+
+```bash
+#!/usr/bin/env bash
+# Makes sure the Docker daemon answers; starts it in a Claude Code cloud session.
+docker info >/dev/null 2>&1 && exit 0
+if [ "$CLAUDE_CODE_REMOTE" = "true" ] && command -v dockerd >/dev/null; then
+  (nohup dockerd >/tmp/dockerd.log 2>&1 &)
+  for _ in $(seq 1 20); do docker info >/dev/null 2>&1 && exit 0; sleep 1; done
+  echo "dockerd did not start: see /tmp/dockerd.log" >&2; exit 1
+fi
+echo "Docker isn't running: start Docker Desktop or the docker service, then rerun" >&2
+exit 1
+```
 
 ## db-test-required guard
 
@@ -64,8 +82,7 @@ Match the image versions to production. In a cloud session the `scripts/cloud-to
 ```json
 {
   "migrations": ["**/migrations/*.py"],
-  "tests": ["**/tests/db/**", "**/test_*_db.py"],
-  "n/a": null
+  "tests": ["**/tests/db/**", "**/test_*_db.py"]
 }
 ```
 
@@ -98,12 +115,13 @@ A parity test reads both sides and names the one to edit:
 
 ```python
 import polib
+from django.conf import settings
 
 def test_every_language_has_every_message():
-    sv = {e.msgid for e in polib.pofile("locale/sv/LC_MESSAGES/django.po")}
-    en = {e.msgid for e in polib.pofile("locale/en/LC_MESSAGES/django.po")}
-    assert not sv - en, f"add to locale/en: {sorted(sv - en)}"
-    assert not en - sv, f"add to locale/sv: {sorted(en - sv)}"
+    ids = {code: {e.msgid for e in polib.pofile(f"locale/{code}/LC_MESSAGES/django.po")} for code, _ in settings.LANGUAGES}
+    every = set().union(*ids.values())
+    missing = {code: sorted(every - have) for code, have in ids.items() if every - have}
+    assert not missing, f"add these messages to each locale: {missing}"
 ```
 
 ## Exhaustive closed sets
@@ -126,10 +144,6 @@ def next_action(stage: Stage) -> str:
         case Stage.HIRED: return "onboard"
         case _: assert_never(stage)
 ```
-
-## Pinned reference data
-
-Official tables live under `reference/<source>/` as JSON with the source URL and the date read at the top. A test loads the file and checks every value the product emits, so a wrong code fails before it reaches anyone outside.
 
 ## CI toolchain step
 
