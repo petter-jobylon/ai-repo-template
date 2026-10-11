@@ -1,6 +1,6 @@
 # ai-repo-template
 
-A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus `/next-step`, which picks and runs a flow of those skills (Feature, Small change, Bug, New view…) with gates before every commit, push or PR. It also carries guardrails for repos written mostly by AI agents, taken from what worked in [erp-mafia/accounted](https://github.com/erp-mafia/accounted); `docs/agents/guardrails.md` lists each one, where it lives and how strong it is. It assumes no language, framework or database; the hooks need Node.
+A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus `/next-step`, which picks and runs a flow of those skills (Feature, Small change, Bug, New view…) with gates before every commit, push or PR. It also carries guardrails for repos written mostly by AI agents, taken from what worked in [erp-mafia/accounted](https://github.com/erp-mafia/accounted); `docs/agents/guardrails.md` lists each one, where it lives and how strong it is. It assumes no language, framework or database: the hooks and guards need Node 22 and make, and CI is GitHub Actions.
 
 ## What's in it
 
@@ -33,7 +33,7 @@ Skills are vendored rather than installed as plugins because cloud sessions igno
 
 ## Adopting it
 
-1. Copy everything except this README and `.github/workflows/template-self-test.yml` into the repo (merge `.gitignore` and any existing `.claude/settings.json` by hand). Needs Node for the hooks and guards, and make (on Windows through Git Bash or WSL).
+1. Copy everything except this README and `.github/workflows/template-self-test.yml` into the repo (merge `.gitignore` and any existing `.claude/settings.json` by hand). Needs Node 22 or later for the hooks and guards, and make (on Windows through Git Bash or WSL).
 2. Fill in `CLAUDE.md`: every `<!-- -->` prompt, then delete the prompts. Keep the section names: `next-step` refers to § Stop and ask, § Commands, § Tests, § Definition of Done, § Decisions, § Workflow and § Where the skills come from.
 3. Fill in the `.claude/rules/` files this repo needs (their `paths:` globs and conventions) and delete the rest; list the ones you keep in `CLAUDE.md` § Rules.
 4. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed.
