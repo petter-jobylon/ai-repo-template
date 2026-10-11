@@ -13,7 +13,7 @@ help: ## List the targets
 setup: ## Install dependencies and tools
 	$(call unconfigured,setup)
 
-up: ## Start the app with its services and migrations applied (agents run it in the background)
+up: ## Start the app with its services (agents run it in the background)
 	$(call unconfigured,up)
 
 down: ## Stop what `make up` started

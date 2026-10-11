@@ -21,18 +21,8 @@ const KINDS = [
 const ENV_FILE = /(^|\/)\.env(\.[^/]+)?$/;
 const ENV_TEMPLATE = /(^|\/)\.env\.(example|sample|template)$/;
 
-function files() {
-  try {
-    return execFileSync('git', ['ls-files', '-co', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
-      .split('\n').filter(Boolean);
-  } catch { // not a git checkout (a fixture): walk the folder
-    const walk = (dir) => fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true }).flatMap((e) =>
-      e.isDirectory() ? (e.name === '.git' ? [] : walk(path.join(dir, e.name))) : [path.join(dir, e.name)]);
-    return walk('.').map((f) => f.replace(/^\.\//, ''));
-  }
-}
-
-const list = files().filter((f) => !f.startsWith('scripts/checks/fixtures/'));
+const list = execFileSync('git', ['ls-files', '-co', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8' })
+  .split('\n').filter((f) => f && !f.startsWith('scripts/checks/fixtures/'));
 console.log(`#scanned ${list.length}`);
 for (const f of list) {
   if (ENV_FILE.test(f) && !ENV_TEMPLATE.test(f)) violation(f, `${f}: an environment file is committed: remove it from git, rotate anything secret in it, and keep only .env.example`);

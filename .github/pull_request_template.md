@@ -5,7 +5,7 @@
 ## First principles
 
 1. **Why did the problem occur?** <!-- The mechanism, and the level the fix works at. -->
-2. **What could be removed or simplified instead?** <!-- What you considered dropping or merging. -->
+2. **What could be removed or simplified instead?** <!-- What you considered dropping or merging; fewer states and less code win unless something concrete needs more. -->
 3. **Is this the best solution, or just the proposed one?** <!-- The alternative you considered and why you did not take it. -->
 
 ## Not live yet

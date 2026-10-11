@@ -1,6 +1,6 @@
 # Guards
 
-`make guards` runs `run.js`: first a self-test of every guard, then the real run. Any language works; `run.js` picks the interpreter by extension (`.js`, `.py`, `.sh`, `.php`, `.ps1`, `.rb`) or runs an executable with no extension.
+`make guards` runs `run.js`: first a self-test of every guard, then the real run. A guard is a `.js` file, run with Node, or an executable file in any language, run through its shebang.
 
 ## The guard contract
 
@@ -15,30 +15,4 @@ Every guard has a fixture, `fixtures/<guard name>/`, laid out like a repo, that 
 
 ## Baselines
 
-A baseline (`baselines/<name>.json`, `{ "<id>": <allowed count> }`) lets a guard adopt a strict rule while existing violations stay. A new violation, or a higher count, fails. A fixed one also fails until the baseline shrinks, so the list only gets shorter:
-
-- `node scripts/checks/run.js --init-baseline <name>` creates a missing baseline from today's violations.
-- `node scripts/checks/run.js --shrink` lowers every baseline to today's counts.
-- Raising a baseline is a hand edit, reviewed by the owners in `.github/CODEOWNERS`, with a `DECISIONS.md` line saying why.
-
-The `add-baseline` skill walks through adding one.
-
-## Patterns
-
-`patterns.json` turns a regex into a guard with no code, and it can take a baseline like any other guard. Each entry is `{ "name", "regex", "flags"?, "include": [globs], "exclude": [globs], "message", "failing_example" }`. It runs as the guard `pattern-<name>`:
-
-- Its violation id is the file path.
-- `failing_example` must match the regex, which is its self-test.
-- An `include` that matches no file fails.
-
-## Examples
-
-- `examples/file-size.js` is a guard that fails source files over a line limit, kept inactive until a repo copies it into `guards/` (steps are in its header).
-- A pattern that keeps logging behind the repo's one logging interface (`ARCHITECTURE.md` § Cross-cutting concerns). For Python:
-
-```json
-{ "name": "no-print", "regex": "^\\s*print\\(", "include": ["**/*.py"], "exclude": ["**/tests/**", "scripts/**"],
-  "message": "use the logger from <your logging module> instead of print()", "failing_example": "    print(order)" }
-```
-
-  For TypeScript, the same entry with `"regex": "\\bconsole\\.(log|debug)\\("` and `"include": ["src/**/*.ts"]`.
+A baseline (`baselines/<name>.json`, `{ "<id>": <allowed count> }`) lets a guard adopt a strict rule while existing violations stay. A new violation, or a higher count, fails. A fixed one also fails until its count is lowered, so the list only gets shorter. `node scripts/checks/run.js --init-baseline <name>` creates a missing baseline from today's violations. Raising a baseline is a hand edit, reviewed by the owners in `.github/CODEOWNERS`, with a `DECISIONS.md` line saying why. The `add-baseline` skill walks through adding one.

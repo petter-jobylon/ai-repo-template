@@ -100,7 +100,40 @@ services:
     healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 1s, retries: 30 }
 ```
 
-Match the image versions to production. In a cloud session the `scripts/cloud-tools.sh` hook starts the Docker daemon if it is stopped; putting `docker compose -f compose.test.yml pull` in the environment's setup script caches the images between sessions.
+Match the image versions to production.
+
+## Docker in cloud sessions
+
+Some cloud images ship the Docker daemon stopped, and a session with more than one repo runs no repo's hooks, so the targets that need Docker start it themselves. `scripts/ensure-docker.sh`:
+
+```bash
+#!/usr/bin/env bash
+# Makes sure the Docker daemon answers; starts it in a Claude Code cloud session.
+docker info >/dev/null 2>&1 && exit 0
+if [ "$CLAUDE_CODE_REMOTE" = "true" ] && command -v dockerd >/dev/null; then
+  (nohup dockerd >/tmp/dockerd.log 2>&1 &)
+  for _ in $(seq 1 20); do docker info >/dev/null 2>&1 && exit 0; sleep 1; done
+  echo "dockerd did not start: see /tmp/dockerd.log" >&2; exit 1
+fi
+echo "Docker isn't running: start Docker Desktop or the docker service, then rerun" >&2
+exit 1
+```
+
+## Cloud environment setup script
+
+Paste into the cloud environment's setup script (its settings, under Setup script). It runs before any session, without the repo checked out, and can be cached between sessions, so the slow, rarely changing steps go here:
+
+```bash
+set -euo pipefail
+pip install --quiet uv
+uv python install 3.12
+if command -v dockerd >/dev/null; then
+  docker info >/dev/null 2>&1 || (nohup dockerd >/tmp/dockerd.log 2>&1 &)
+  for _ in $(seq 1 20); do docker info >/dev/null 2>&1 && break; sleep 1; done
+  docker pull mirror.gcr.io/library/postgres:16-alpine
+  docker pull mirror.gcr.io/library/redis:7-alpine
+fi
+```
 
 ## db-test-required guard
 
@@ -109,8 +142,7 @@ Match the image versions to production. In a cloud session the `scripts/cloud-to
 ```json
 {
   "migrations": ["**/migrations/*.py"],
-  "tests": ["**/tests/db/**", "**/test_*_db.py"],
-  "n/a": null
+  "tests": ["**/tests/db/**", "**/test_*_db.py"]
 }
 ```
 
@@ -139,68 +171,7 @@ def test_every_foreign_key_has_an_index():
     assert not missing, f"add an index for each foreign key: {missing}"
 ```
 
-A parity test reads both sides and names the one to edit:
-
-```python
-import polib
-
-def test_every_language_has_every_message():
-    sv = {e.msgid for e in polib.pofile("locale/sv/LC_MESSAGES/django.po")}
-    en = {e.msgid for e in polib.pofile("locale/en/LC_MESSAGES/django.po")}
-    assert not sv - en, f"add to locale/en: {sorted(sv - en)}"
-    assert not en - sv, f"add to locale/sv: {sorted(en - sv)}"
-```
-
-## Exhaustive closed sets
-
-Model a closed set as an `Enum` and end each `match` with `assert_never`, so mypy fails until a new member is handled everywhere:
-
-```python
-from enum import Enum
-from typing import assert_never
-
-class Stage(Enum):
-    APPLIED = "applied"
-    INTERVIEW = "interview"
-    HIRED = "hired"
-
-def next_action(stage: Stage) -> str:
-    match stage:
-        case Stage.APPLIED: return "screen"
-        case Stage.INTERVIEW: return "schedule"
-        case Stage.HIRED: return "onboard"
-        case _: assert_never(stage)
-```
-
-## Pinned reference data
-
-Official tables live under `reference/<source>/` as JSON with the source URL and the date read at the top. A test loads the file and checks every value the product emits, so a wrong code fails before it reaches anyone outside.
-
-## Layers
-
-A common Django split: models hold data and its rules, services hold the use cases, and views and serializers call services, never models directly. `scripts/checks/layers.json`:
-
-```json
-{
-  "import_patterns": { ".py": ["^\\s*from\\s+([\\w.]+)\\s+import", "^\\s*import\\s+([\\w.]+)"] },
-  "layers": [
-    { "name": "models", "paths": ["**/models.py", "**/models/**"], "modules": ["\\.models(\\.|$)"], "may_import": [] },
-    { "name": "services", "paths": ["**/services.py", "**/services/**"], "modules": ["\\.services(\\.|$)"], "may_import": ["models"] },
-    { "name": "api", "paths": ["**/views.py", "**/serializers.py", "**/api/**"], "modules": ["\\.(views|serializers|api)(\\.|$)"], "may_import": ["services"] }
-  ],
-  "n/a": null
-}
-```
-
-Write the same three rows in `ARCHITECTURE.md`. Logging goes through one logger; the `no-print` pattern in `scripts/checks/README.md` § Examples keeps `print()` out of app code.
-
-## Low-risk paths
-
-Add `uv.lock` to `low_risk` in `scripts/low-risk-paths.json`, so a lockfile-only dependency bump can auto-merge once CI is green. A change to `pyproject.toml` still needs the user's go-ahead.
-
-## Every way in is gated (product agents)
-
-For `.claude/rules/agent-tools.md` rule 6: a sweep over Django's URL resolver fails when a Django REST framework view is neither permission-gated nor on the explicit free list.
+A second sweep fails when a Django REST framework view is neither permission-gated nor on an explicit free list:
 
 ```python
 from django.urls import get_resolver
@@ -225,19 +196,61 @@ def test_every_api_view_is_gated_or_listed_free():
     assert not open_views, f"gate these views, or add them to FREE with a reason: {open_views}"
 ```
 
-## Cloud environment setup script
+A parity test reads both sides and names the one to edit:
 
-In `scripts/cloud-env-setup.sh`, fill the two steps:
+```python
+import polib
+from django.conf import settings
 
-```bash
-# 1. Toolchain
-pip install --quiet uv
-uv python install 3.12
-
-# 2. Docker images
-  docker pull mirror.gcr.io/library/postgres:16-alpine
-  docker pull mirror.gcr.io/library/redis:7-alpine
+def test_every_language_has_every_message():
+    ids = {code: {e.msgid for e in polib.pofile(f"locale/{code}/LC_MESSAGES/django.po")} for code, _ in settings.LANGUAGES}
+    every = set().union(*ids.values())
+    missing = {code: sorted(every - have) for code, have in ids.items() if every - have}
+    assert not missing, f"add these messages to each locale: {missing}"
 ```
+
+## Exhaustive closed sets
+
+Model a closed set as an `Enum` and end each `match` with `assert_never`, so mypy fails until a new member is handled everywhere:
+
+```python
+from enum import Enum
+from typing import assert_never
+
+class Stage(Enum):
+    APPLIED = "applied"
+    INTERVIEW = "interview"
+    HIRED = "hired"
+
+def next_action(stage: Stage) -> str:
+    match stage:
+        case Stage.APPLIED: return "screen"
+        case Stage.INTERVIEW: return "schedule"
+        case Stage.HIRED: return "onboard"
+        case _: assert_never(stage)
+```
+
+## Layers
+
+A common Django split: models hold data and its rules, services hold the use cases, and views and serializers call services, never models directly. `scripts/checks/layers.json`:
+
+```json
+{
+  "import_patterns": { ".py": ["^\\s*from\\s+([\\w.]+)\\s+import", "^\\s*import\\s+([\\w.]+)"] },
+  "layers": [
+    { "name": "models", "paths": ["**/models.py", "**/models/**"], "modules": ["\\.models(\\.|$)"], "may_import": [] },
+    { "name": "services", "paths": ["**/services.py", "**/services/**"], "modules": ["\\.services(\\.|$)"], "may_import": ["models"] },
+    { "name": "api", "paths": ["**/views.py", "**/serializers.py", "**/api/**"], "modules": ["\\.(views|serializers|api)(\\.|$)"], "may_import": ["services"] }
+  ],
+  "n/a": null
+}
+```
+
+Write the same three rows in `ARCHITECTURE.md`. Logging goes through one logger; the `no-print` pattern in `scripts/checks/README.md` § Examples keeps `print()` out of app code.
+
+## Low-risk paths
+
+Add `uv.lock` to `low_risk` in `scripts/low-risk-paths.json`, so a lockfile-only dependency bump can auto-merge once CI is green. A change to `pyproject.toml` still needs the user's go-ahead.
 
 ## CI toolchain step
 
@@ -252,9 +265,9 @@ In `.github/actions/setup/action.yml`, replace the `TOOLCHAIN` comment with:
 
 Use the Python version the project pins. Keep the SHA pin and its version comment.
 
-## Redis
+## Pinned dependencies
 
-Redis holds caches, sessions and queue messages, never a value that must survive a flush. A rule that has to hold (a unique email, a balance, an allowed state change) lives in PostgreSQL as a constraint or trigger, so a Redis outage or eviction can't break it.
+A dependency held at an exact version on purpose gets `==` in `pyproject.toml` and the reason in a comment on the same line. `make setup` runs `uv sync --frozen`, which refuses a lockfile that no longer matches.
 
 ## Production scripts as Django management commands
 
