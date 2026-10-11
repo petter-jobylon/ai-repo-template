@@ -40,7 +40,7 @@ Every guardrail this template carries: where it lives, how strong it is, and whe
 | CI | Auto-merge only low-risk paths | agents use your GitHub identity, so this is an instruction, not a CI check | first month | `scripts/low-risk-paths.json`, `make merge-check`, `CLAUDE.md` § Workflow | soft | not yet |
 | Review | Record what happened to each AI review finding | the next session doesn't reopen a finding someone already declined | first month | `CLAUDE.md` § Decisions, `next-step` review step | soft | not yet |
 | Review | Run an adversarial second-agent pass before the PR | an agent rarely finds the flaws in its own change | as you grow | `skeptic-pass` skill, `next-step` Feature flow | process | not yet |
-| Review | Assign human reviewers to the guardrail files | loosening a guard or raising a baseline gets a person's eyes | first month | `.github/CODEOWNERS` | hard | not yet |
+| Review | Assign human reviewers to the guardrail files | loosening a guard or raising a baseline gets a person's eyes | with a team | `.github/CODEOWNERS` | hard | not yet |
 | Review | Make production scripts dry-run by default | what runs against production is what a person reviewed | first month | `.claude/rules/prod-scripts.md`, recipe example | soft | not yet |
 | Review | Track escalated decisions until someone resolves them | questions parked for a person get lost without a list to grep | as you grow | `CLAUDE.md` § Decisions (ESCALATED / RESOLVED) | soft | not yet |
 | Review | Commit freely, ship one small PR per ticket | short-lived PRs are easier to review and to merge while green | day one | `next-step` (commit step, Feature flow) | process | not yet |

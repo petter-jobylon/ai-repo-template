@@ -24,7 +24,7 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 | `.github/workflows/ci.yml` | The make targets, a zizmor job, and `ci-summary`, the one check to require |
 | `.github/actions/setup/` | The one CI step each repo fills in: its toolchain |
 | `.github/rulesets/main.json` | Ruleset to import: `ci-summary` required, code owner review, no force push |
-| `.github/CODEOWNERS` | Owners for guardrail files (fill in) |
+| `.github/CODEOWNERS` | Owners for guardrail files (fill in with a team; leave commented out when solo) |
 | `docs/agents/optional/` | Opt-in pieces to copy in when they apply: `docs/agents/optional/write-domain-skill/` into `.claude/skills/` when agents need facts set by law, tax or a standard, and `docs/agents/optional/product-agents.md` into `.claude/rules/` when the product lets AI agents act for customers |
 | `docs/agents/recipes/` | How to fill each stack slot; today Python, Django, PostgreSQL and Redis |
 | `scripts/vendor-skills.sh` | Re-vendors every third-party skill to latest and self-tests the hooks |
@@ -37,14 +37,14 @@ Skills are vendored rather than installed as plugins because cloud sessions igno
 
 ## Adopting it
 
-1. Copy everything except this README into the repo (merge `.gitignore` and any existing `.claude/settings.json` by hand). Needs Node 22 or later for the hooks and guards, and make (on Windows through Git Bash or WSL).
-2. Fill in `CLAUDE.md`: every `<!-- -->` prompt, then delete the prompts. Keep the section names: `next-step` refers to § Stop and ask, § Commands, § Tests, § Definition of Done, § Decisions, § Workflow and § Where the skills come from.
-3. Fill in the `.claude/rules/` files this repo needs (their `paths:` globs and conventions) and delete the rest; list the ones you keep in `CLAUDE.md` § Rules.
-4. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed.
+1. Copy everything except this README into the repo (merge `.gitignore` and any existing `.claude/settings.json` by hand). Needs Node 22 or later for the hooks and guards, and make (on Windows through Git Bash or WSL). For Claude Code cloud sessions, also paste the recipe's setup script into the cloud environment (§ Cloud sessions).
+2. Fill in `CLAUDE.md`: every `<!-- -->` prompt, then delete the prompts. Keep the section names: `next-step` and the hand-written skills refer to § Hard rules, § Stop and ask, § Commands, § Tests, § Definition of Done, § Decisions, § Rules, § Workflow and § Where the skills come from.
+3. Fill in the `.claude/rules/` files this repo needs (their `paths:` globs and conventions) and delete the rest; list the ones you keep in `CLAUDE.md` § Rules. Copy in the pieces of `docs/agents/optional/` that apply (the table above says when).
+4. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed. Then write the rows of `docs/agents/agent-access.md`: how agents reach tickets, logs, errors and metrics, and what they may not do there.
 5. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "make", "runtimeArgs": ["up"], "port": 8000 }`.
 6. UI repos: run `/impeccable init` for `PRODUCT.md`, and `/impeccable document` for `DESIGN.md` if the UI already exists.
-7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. To require a real-store test with each migration, add `scripts/checks/db-test-required.json`; to enforce the layers in `ARCHITECTURE.md`, add `scripts/checks/layers.json` (the recipe has both). Turn on "Allow auto-merge" in the repo settings if agents should auto-merge low-risk PRs. `make check` passing locally is the bar.
-8. Fill in `.github/CODEOWNERS`, then import the ruleset: `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. It requires `ci-summary`, so a red CI blocks the merge.
+7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. To require a real-store test with each migration, add `scripts/checks/db-test-required.json`; to enforce the layers in `ARCHITECTURE.md`, add `scripts/checks/layers.json` (the recipe has both). Turn on "Allow auto-merge" in the repo settings if agents should auto-merge low-risk PRs. `make check` passing locally is the bar. In an existing repo, start a strict rule with a baseline (`add-baseline`) instead of fixing every old violation first; most linters have their own baseline or per-file ignores for the same purpose.
+8. Import the ruleset: `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. It requires `ci-summary`, so a red CI blocks the merge. With a team, fill in `.github/CODEOWNERS` first, so a second person approves guardrail changes. As a solo maintainer, leave it commented out: agents open PRs as you, GitHub doesn't let a PR's author approve it, and required code owner review would block every guardrail PR. Agents already stop for your go-ahead before every push and PR, and `make merge-check` never calls a guardrail change low-risk.
 9. Go through `docs/agents/guardrails.md`: mark each guardrail `yes` or `n/a` under Adopted here as the repo takes it on.
 10. Try it: `/next-step` with a small change.
 

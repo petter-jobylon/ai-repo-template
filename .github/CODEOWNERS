@@ -1,5 +1,6 @@
 # Guardrail files need an owner's approval (the ruleset turns on code owner review).
 # Replace @OWNER with a user or team and uncomment the lines this repo uses.
+# Solo maintainer: leave it all commented out, or you can't merge your own guardrail PRs (README step 8).
 # /scripts/checks/        @OWNER
 # /.github/               @OWNER
 # /.claude/rules/         @OWNER
