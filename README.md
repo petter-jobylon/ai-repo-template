@@ -47,7 +47,7 @@ Skills are vendored rather than installed as plugins because cloud sessions igno
 1. **Merge instead of overwriting** `CLAUDE.md` and `AGENTS.md` (move what they say into the skeleton's sections or `.claude/rules/`), the `Makefile` (wrap the commands the repo already uses in its targets), `.github/workflows/ci.yml` and the PR template.
 2. **Run `make guards` first** and fix or freeze what it finds: stale paths in the existing docs get fixed or baselined (`node scripts/checks/run.js --init-baseline <guard>`), and an over-long `CLAUDE.md` moves detail into `.claude/rules/`.
 3. **Lint and typecheck start from today's errors**: suppress them with the tool's own baseline or per-file ignores, or start the typecheck lenient, then tighten.
-4. **Import the ruleset last**, once the new `ci.yml` has produced a green `ci-summary`, and drop required checks the new CI no longer runs from any old branch protection; otherwise every PR is blocked.
+4. **Import the ruleset last**, once the new `.github/workflows/ci.yml` has produced a green `ci-summary`, and drop required checks the new CI no longer runs from any old branch protection; otherwise every PR is blocked.
 5. **The hard rules apply to new and changed code.** Legacy code gets baselines (`add-baseline`) and tickets, not a rewrite. Adding a constraint to a table whose existing rows break it is a stop-and-ask.
 
 ## This template repo's own CI
