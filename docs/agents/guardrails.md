@@ -5,7 +5,7 @@ Every guardrail this template carries, where it lives and how strong it is. Each
 entirely coded; the evidence column says what happened there.
 
 - **Strength**: hard means a check, test or the data store refuses; soft means an instruction the agent should follow; process means a skill or flow step.
-- **Template**: `in place`, or the planned PR that adds it.
+- **Template**: `in place`, the planned PR that adds it, or `deferred` (left out for now; the Where column says why).
 - **Adopted here**: edit to `yes` or `n/a` as this repo takes each one on.
 
 ## Instructions and context
@@ -100,7 +100,7 @@ Scheduled agents (loops) and parallel sessions can overreach, collide or never s
 | Let loops propose and never merge | as you grow | `.claude/loops.md` | soft | planned (PR 4) | not yet | loops open PRs and never merge; risky areas are ticket-only |
 | Check at session start that every loop runs | as you grow | `loop-ignite` skill, SessionStart hook | process | planned (PR 4) | not yet | 'check the pr comments' was typed 323 times before loops existed |
 | Make local checks call the same scripts as CI | as you grow | Makefile targets shared by CI, hooks and loops | hard | planned (PR 2) | not yet | a hand-copied loop check greps moved folders and never fires |
-| Give each parallel agent its own worktree | as you grow | `next-step`, `.claude/loops.md` | process | planned (PR 4) | not yet | shared checkouts corrupted commits across sessions |
+| Give each parallel agent its own worktree | as you grow | not set up: each cloud session has its own checkout | process | deferred | not yet | shared checkouts corrupted commits across sessions |
 
 ## Memory and learning from incidents
 
