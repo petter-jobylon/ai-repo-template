@@ -97,7 +97,7 @@ Scheduled agents (loops) and parallel sessions can overreach, collide or never s
 
 | Guardrail | When | Where | Strength | Template | Adopted here | Evidence in Accounted |
 |---|---|---|---|---|---|---|
-| Let loops propose and never merge | as you grow | `.claude/loops.md`, ruleset | soft | in place | not yet | loops open PRs and never merge; risky areas are ticket-only |
+| Let loops propose, and merge only low-risk paths | as you grow | `.claude/loops.md`, ruleset | soft | in place | not yet | loops open PRs and never merge; risky areas are ticket-only |
 | Check at session start that every loop runs | as you grow | `check-loops` skill | process | in place | not yet | 'check the pr comments' was typed 323 times before loops existed |
 | Make local checks call the same scripts as CI | as you grow | `Makefile` targets shared by CI, hooks and loops | hard | in place | not yet | a hand-copied loop check greps moved folders and never fires |
 | Give each parallel agent its own worktree | as you grow | not set up: each cloud session has its own checkout | process | deferred | not yet | shared checkouts corrupted commits across sessions |
