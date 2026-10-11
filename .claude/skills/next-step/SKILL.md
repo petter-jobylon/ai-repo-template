@@ -101,7 +101,7 @@ The UI flows (New view, New component, Visual tweak) apply only to repos with a 
 - [ ] diagnosing-bugs: one command that goes red on this bug, before any theory
 - [ ] tdd: regression test at the seam the bug shows through (CLAUDE.md § Tests)
 - [ ] fix → full suite green
-- [ ] guardrail-from-incident: name the mechanism, then a guard for the whole class (sibling-sweep first when the mechanism can recur elsewhere) and its DECISIONS.md line
+- [ ] guardrail-from-incident, when the mechanism can recur; otherwise say in one line why not
 - [ ] review → commit ⏸ → pr ⏸
 ```
 
@@ -160,7 +160,7 @@ No tickets, and no new test unless the rendered content changes.
 ### Code health
 
 ```
-- [ ] improve-codebase-architecture (structure), ponytail-audit (what to delete), sibling-sweep (a defect pattern across the codebase), add-baseline (a rule that keeps being broken) or claim-sweep (agent docs that no longer match the code)
+- [ ] improve-codebase-architecture (structure), ponytail-audit (what to delete), guardrail-from-incident (a defect pattern across the codebase), add-baseline (a rule that keeps being broken) or claim-sweep (agent docs that no longer match the code)
 - [ ] pick one ⏸
 - [ ] a deepening pick is grilled inside improve-codebase-architecture itself → to-spec (Feature) or branch → implement (Small change); a deletion → Small change
 ```
@@ -196,7 +196,6 @@ Never go from the map straight to implement unless the effort turned out small. 
 - Near the smart zone (about 150k tokens) before that, `/compact` at the nearest phase boundary, never mid-step.
 - At a phase boundary the first that fits wins: **continue** (the next step needs this context verbatim and there's room) → **`/clear`** (nothing here matters next) → **`/handoff`** (a new directory, harness or colleague, or forking a side task) → **subagent** (runs without steering, e.g. a review) → **`/compact`** with an instruction on what to keep.
 - `/wait-what` whenever a message didn't land.
-- Parallel sessions and loops each work on their own branch. Loops follow `.claude/loops.md`, and `check-loops` confirms they run.
 
 ## Guide the user on ponytail
 
@@ -209,7 +208,7 @@ Ponytail's hooks have two quirks; tell the user when they bite:
 
 - **Planning**: `grill-with-docs` (interview that records terms in `CONTEXT.md` and ADRs in `docs/adr/`), `grilling` (the bare interview), `to-spec` (spec as a tracker issue), `to-tickets` (tracer-bullet tickets with blocking edges), `wayfinder` (map of decision tickets), `triage` (raw issues to agent-ready ones).
 - **Building**: `implement` (per ticket, test-first, closes with review), `tdd` (red-green at the agreed seams), `code-review` (Standards and Spec axes against a fixed point), `skeptic-pass` (independent agents try to refute a frozen head), `pr` (the PR body).
-- **Debugging**: `diagnosing-bugs` (feedback loop first, then a regression test), `guardrail-from-incident` (a guard for the whole class of a fixed bug), `sibling-sweep` (every sibling of a defect, fixed, with a detector left behind), `resolving-merge-conflicts` (by intent; never `--abort`).
+- **Debugging**: `diagnosing-bugs` (feedback loop first, then a regression test), `guardrail-from-incident` (every sibling of a fixed bug, and a guard for the whole class), `resolving-merge-conflicts` (by intent; never `--abort`).
 - **UI**: `impeccable` (the design workflow, briefed by `PRODUCT.md` from `impeccable init` and `DESIGN.md` from `impeccable document` or new-work; `live` is local-only), `playwright-cli` (open pages served by the preview command and screenshot them).
 - **Code health**: `improve-codebase-architecture` (deepening opportunities), `codebase-design` (deep-module vocabulary), `domain-modeling` (sharpen a `CONTEXT.md` term or record an ADR), `add-baseline` (adopt a strict rule with a baseline that only shrinks), `claim-sweep` (test agent docs' claims against the code), `ponytail-review` (over-engineering in a diff), `ponytail-audit` (in the whole repo), `ponytail-debt` (every `ponytail:` comment), `ponytail`, `ponytail-help`, `ponytail-gain` (the always-on lazy mode, its command card, its benchmarks).
 - **Research and writing**: `research` (cited Markdown from primary sources), `writing-for-agents` (skills, `CLAUDE.md`, agent docs).

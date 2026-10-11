@@ -12,7 +12,7 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 | `.claude/launch.json` | Empty; add your app's dev server |
 | `CLAUDE.md` | Skeleton with the sections `next-step` reads, plus hard rules, stop-and-ask, Definition of Done, first-principles questions and the decision tiers |
 | `AGENTS.md` | Pointer to `CLAUDE.md` for other agent tools, so each rule keeps one home |
-| `.claude/rules/` | Path-scoped rules (`api`, `data`, `tests`, `security`, `prod-scripts`, and `agent-tools` for products that expose AI agents), each loaded only for the paths in its header |
+| `.claude/rules/` | Path-scoped rule skeletons (`api`, `data`, `tests`, `security`, `prod-scripts`), each loaded only for the paths in its header |
 | `.claude/loops.md` | Policy and registry for scheduled agents: propose, never merge, one branch each |
 | `DECISIONS.md` | One-line decision log, beside ADRs in `docs/adr/` |
 | `.github/pull_request_template.md` | First-principles answers, what is not live yet, Definition of Done |
@@ -23,7 +23,7 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 | `.github/actions/setup/` | The one CI step each repo fills in: its toolchain |
 | `.github/rulesets/main.json` | Ruleset to import: `ci-summary` required, code owner review, no force push |
 | `.github/CODEOWNERS` | Owners for guardrail files (fill in) |
-| `docs/agents/optional/` | Opt-in pieces to copy in when they apply: `docs/agents/optional/write-domain-skill/` into `.claude/skills/` when agents need facts set by law, tax or a standard |
+| `docs/agents/optional/` | Opt-in pieces to copy in when they apply: `docs/agents/optional/write-domain-skill/` into `.claude/skills/` when agents need facts set by law, tax or a standard, and `docs/agents/optional/product-agents.md` into `.claude/rules/` when the product lets AI agents act for customers |
 | `docs/agents/recipes/` | How to fill each stack slot; today Python, Django, PostgreSQL and Redis |
 | `scripts/vendor-skills.sh` | Re-vendors every third-party skill to latest and self-tests the hooks |
 | `scripts/cloud-tools.sh` | Cloud sessions only: installs `playwright-cli` and `linearis`, and trusts the egress proxy's CAs |
