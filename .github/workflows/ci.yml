@@ -18,7 +18,7 @@ concurrency:
 jobs:
   make:
     # Skipped only in the template repo itself (repository variable TEMPLATE_SELF=true), whose
-    # targets are unfilled on purpose; template-self-test.yml checks it instead.
+    # targets are unfilled on purpose; template-self-test runs there instead.
     if: vars.TEMPLATE_SELF != 'true'
     name: make ${{ matrix.targets }}
     strategy:
@@ -50,18 +50,38 @@ jobs:
           min-severity: high
           advanced-security: false
 
+  # Only in the template repo itself (TEMPLATE_SELF=true): the guards pass and an unfilled
+  # target fails loudly. Adopting repos skip it.
+  template-self-test:
+    if: vars.TEMPLATE_SELF == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - run: make guards
+      - name: Unfilled targets fail loudly
+        run: |
+          if make lint 2>err.txt; then echo "make lint passed while unfilled"; exit 1; fi
+          grep -q "not configured yet" err.txt
+
   ci-summary:
     name: ci-summary
     if: always()
-    needs: [make, workflow-lint]
+    needs: [make, workflow-lint, template-self-test]
     runs-on: ubuntu-latest
     steps:
-      - name: Every job passed
+      - name: Every job did what it should
         env:
           MAKE: ${{ needs.make.result }}
+          SELF_TEST: ${{ needs.template-self-test.result }}
           WORKFLOW_LINT: ${{ needs.workflow-lint.result }}
           TEMPLATE_SELF: ${{ vars.TEMPLATE_SELF }}
         run: |
-          echo "make: $MAKE, workflow-lint: $WORKFLOW_LINT"
-          [ "$WORKFLOW_LINT" = success ] || exit 1
-          [ "$MAKE" = success ] || { [ "$TEMPLATE_SELF" = true ] && [ "$MAKE" = skipped ]; }
+          echo "make: $MAKE, template-self-test: $SELF_TEST, workflow-lint: $WORKFLOW_LINT"
+          # The template repo runs the self-test instead of the make jobs; every other repo the reverse.
+          if [ "$TEMPLATE_SELF" = true ]; then want="skipped success"; else want="success skipped"; fi
+          [ "$WORKFLOW_LINT" = success ] && [ "$MAKE $SELF_TEST" = "$want" ]

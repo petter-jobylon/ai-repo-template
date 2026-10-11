@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Hard rules
 
-1. **What must never break is refused, not requested**: a data-store constraint, a type or a guard enforces it, with no exception for admin roles. A cache or queue never holds such a rule.
+1. **The data store enforces what must never break about stored data**: a constraint, trigger, schema validation or permission, with no exception for admin roles. A rule with no store behind it gets a type or a guard. A cache or queue never holds such a rule.
 2. **One way in per dangerous action** (deletion, permission changes, anything sent outside): one function or endpoint, and a guard or constraint refuses every other path.
 3. **Fail closed**: when a check that decides access or correctness can't run, refuse and say why. Failing open needs a visible trace.
 4. **Closed sets are exhaustive**: a new value fails the typecheck, or a test that enumerates the set, until every place handles it.
@@ -47,14 +47,14 @@ A change is done when all of these hold; iterate until they do:
 2. New or changed behaviour has tests at the seams in § Tests.
 3. Every rule, guard and agent doc the change made stale is updated in the same change.
 4. Each non-obvious choice has its line in `DECISIONS.md` (§ Decisions).
-5. Switched on: confirmed live in its target environment, or the PR's Not live yet section names what isn't and who turns it on.
+5. Switched on: confirmed live in its target environment (migration applied, scheduled job seen firing, script run, feature reachable), or the PR's Not live yet section names what isn't and who turns it on.
 
 ## Decisions
 
 - **ADR** (`docs/adr/`, via `/domain-modeling`): a choice that is hard to reverse, surprising without context and a real trade-off.
 - **`DECISIONS.md` line** (format in its header; the `decisions-format` guard checks it) for every other non-obvious choice: picked A over B, declined a dependency or a review finding, stopped because a rule forbade something, diverged from the issue's proposal. The detail goes in the PR body.
 
-Grep both before reopening a past choice.
+Grep both before reopening a past choice. A question parked for a person gets an `ESCALATED` line, and a `RESOLVED` line once answered; `grep ESCALATED DECISIONS.md` shows what is waiting.
 
 ## Rules
 
