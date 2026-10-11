@@ -37,10 +37,18 @@ Skills are vendored rather than installed as plugins because cloud sessions igno
 4. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed.
 5. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }`.
 6. UI repos: run `/impeccable init` for `PRODUCT.md`, and `/impeccable document` for `DESIGN.md` if the UI already exists.
-7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. `make check` passing locally is the bar. In an existing repo, start a strict rule with a baseline (`add-baseline`) instead of fixing every old violation first; most linters have their own baseline or per-file ignores for the same purpose.
+7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. `make check` passing locally is the bar; in an existing repo, see § Adopting into an existing repo.
 8. Import the ruleset: `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. It requires `ci-summary`, so a red CI blocks the merge. With a team, fill in `.github/CODEOWNERS` first, so a second person approves guardrail changes. As a solo maintainer, leave it commented out: agents open PRs as you, GitHub doesn't let a PR's author approve it, and required code owner review would block every guardrail PR. Agents already stop for your go-ahead before every push and PR.
 9. Go through `docs/agents/guardrails.md`: mark each guardrail `yes` or `n/a` under Adopted here as the repo takes it on.
 10. Try it: `/next-step` with a small change.
+
+## Adopting into an existing repo
+
+1. **Merge instead of overwriting** `CLAUDE.md` and `AGENTS.md` (move what they say into the skeleton's sections or `.claude/rules/`), the `Makefile` (wrap the commands the repo already uses in its targets), `.github/workflows/ci.yml` and the PR template.
+2. **Run `make guards` first** and fix or freeze what it finds: stale paths in the existing docs get fixed or baselined (`node scripts/checks/run.js --init-baseline <guard>`), and an over-long `CLAUDE.md` moves detail into `.claude/rules/`.
+3. **Lint and typecheck start from today's errors**: suppress them with the tool's own baseline or per-file ignores, or start the typecheck lenient, then tighten.
+4. **Import the ruleset last**, once the new `ci.yml` has produced a green `ci-summary`, and drop required checks the new CI no longer runs from any old branch protection; otherwise every PR is blocked.
+5. **The hard rules apply to new and changed code.** Legacy code gets baselines (`add-baseline`) and tickets, not a rewrite. Adding a constraint to a table whose existing rows break it is a stop-and-ask.
 
 ## This template repo's own CI
 

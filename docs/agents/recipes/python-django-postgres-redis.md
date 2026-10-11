@@ -31,6 +31,8 @@ build: ## Build every configuration this repo ships
 
 `test-db` arrives with the real-database layer: a compose file that starts PostgreSQL and Redis, runs the `db`-marked tests against them and stops them.
 
+An existing Django suite has no `db` marker, and its tests already hit the database: point `test` at the whole suite (`uv run pytest`) and set `test-db` to `@echo "n/a: make test runs against the database"` until new real-store tests get the marker.
+
 ## CI toolchain step
 
 In `.github/actions/setup/action.yml`, replace the `TOOLCHAIN` comment with:
