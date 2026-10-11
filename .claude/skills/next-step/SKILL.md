@@ -27,6 +27,7 @@ Stop and wait for the user:
 - before every push or PR (commits on your own branch need no gate)
 - the environment's stop hook asking to commit and push (`stop-hook-git-check.sh` in cloud sessions) doesn't open the push gate: commit if you haven't, stay stopped before the push, and tell the user it fired
 - when a step fails twice, or a skill or `CLAUDE.md` says to ask first (`CLAUDE.md` § Stop and ask)
+- when you park a choice for a person: its `ESCALATED` line goes in `DECISIONS.md` first (`CLAUDE.md` § Decisions)
 
 ## Shared steps
 
