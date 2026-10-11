@@ -4,6 +4,7 @@
 //
 //   node scripts/checks/run.js                          self-tests, then all guards
 //   node scripts/checks/run.js --init-baseline <name>   create a missing baseline
+//   node scripts/checks/run.js --report                 what each baseline still allows, largest first
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -61,6 +62,17 @@ if (init >= 0) {
   const counts = [...runGuard(g, ROOT).counts].sort(([a], [b]) => a.localeCompare(b));
   fs.writeFileSync(baselinePath(name), JSON.stringify(Object.fromEntries(counts), null, 2) + '\n');
   console.log(`wrote ${path.relative(ROOT, baselinePath(name))}`);
+  process.exit(0);
+}
+
+if (process.argv.includes('--report')) {
+  const rows = guards.map((g) => {
+    const base = readBaseline(g.name) || {};
+    return { name: g.name, ids: Object.keys(base).length, total: Object.values(base).reduce((a, n) => a + n, 0) };
+  }).sort((a, b) => b.total - a.total);
+  console.log('Baselines (violations still allowed; each one only shrinks):');
+  for (const r of rows) console.log(`  ${String(r.total).padStart(6)}  ${r.name}${r.ids ? ` (${r.ids} ids)` : ' (no baseline: zero allowed)'}`);
+  console.log(`  ${String(rows.reduce((a, r) => a + r.total, 0)).padStart(6)}  total`);
   process.exit(0);
 }
 

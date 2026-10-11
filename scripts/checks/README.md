@@ -15,7 +15,7 @@ Every guard has a fixture, `fixtures/<guard name>/`, laid out like a repo, that 
 
 ## Baselines
 
-A baseline (`baselines/<name>.json`, `{ "<id>": <allowed count> }`) lets a guard adopt a strict rule while existing violations stay. A new violation, or a higher count, fails. A fixed one also fails until its count is lowered, so the list only gets shorter. `node scripts/checks/run.js --init-baseline <name>` creates a missing baseline from today's violations. Raising a baseline is a hand edit, reviewed by the owners in `.github/CODEOWNERS`, with a `DECISIONS.md` line saying why. The `add-baseline` skill walks through adding one.
+A baseline (`baselines/<name>.json`, `{ "<id>": <allowed count> }`) lets a guard adopt a strict rule while existing violations stay. A new violation, or a higher count, fails. A fixed one also fails until its count is lowered, so the list only gets shorter. `node scripts/checks/run.js --init-baseline <name>` creates a missing baseline from today's violations, and `--report` lists what each baseline still allows, largest first. Raising a baseline is a hand edit, reviewed by the owners in `.github/CODEOWNERS`, with a `DECISIONS.md` line saying why. The `add-baseline` skill walks through adding one.
 
 ## Example
 
