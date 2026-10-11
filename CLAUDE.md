@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Hard rules
 
-1. **The data store enforces what must never break**: constraints, triggers, schema validation or permissions, with no exception for admin roles. A cache or queue never holds such a rule.
-2. **One way in per dangerous action** (money, permissions, deletion, anything posted or sent): one function or endpoint, and a guard or data-store rule refuses every other path.
+1. **What must never break is refused, not requested**: a data-store constraint, a type or a guard enforces it, with no exception for admin roles. A cache or queue never holds such a rule.
+2. **One way in per dangerous action** (deletion, permission changes, anything sent outside): one function or endpoint, and a guard or constraint refuses every other path.
 3. **Fail closed**: when a check that decides access or correctness can't run, refuse and say why. Failing open needs a visible trace.
 4. **Closed sets are exhaustive**: a new value fails the typecheck, or a test that enumerates the set, until every place handles it.
 5. **A fact lives in one place**: a second copy is generated from it (`make generate`), or a parity test reads both and names the side to edit.
@@ -17,11 +17,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Stop and ask
 
-Stop and ask; do not guess. How agents reach tickets, logs, errors and metrics, and what they may not touch there: `docs/agents/agent-access.md`. <!-- The areas where a wrong guess is expensive (e.g. production data, money, auth, legal rules) and who decides each. -->
+Stop and ask; do not guess. How agents reach tickets, logs, errors and metrics, and what they may not touch there: `docs/agents/agent-access.md`. <!-- The areas where a wrong guess is expensive (e.g. production data, auth, payments) and who decides each. -->
 
 ## Commands
 
-`make help` lists the targets (`setup`, `check`, `lint`, `typecheck`, `test`, `test-db`, `guards`, `generate`, `generate-check`, `build`). CI, hooks and loops call only these, so a target's body is the one place a command lives.
+`make help` lists the targets, and `make check` runs what CI runs. CI, hooks and loops call only make targets, so a target's body is the one place a command lives.
 
 <!-- Commands make doesn't cover, from the repo root: how to run one test while iterating. -->
 `make up` serves the app with its services and migrations applied (run it in the background), and `make seed` loads demo data. <!-- The URL `make up` serves, used by /next-step's screenshot step. Delete this line if the repo has no UI. -->
@@ -38,37 +38,28 @@ Don't mock our own modules or add tests at other seams. A new seam needs this se
 
 ## Fix from first principles
 
-A reported problem usually arrives with a proposed fix. Treat that fix as evidence about the pain, and answer three questions before implementing; the answers go in the PR body:
-
-1. **Why did the problem occur?** Name the mechanism, then fix at the level that stops the whole class of bug.
-2. **What could be removed or simplified instead?** Fewer states and less code win unless something concrete needs more.
-3. **Is this the best solution, or just the proposed one?** Write down the alternative you considered and why you did not take it.
-
-When the chosen path differs from the one the issue proposed, log it (§ Decisions).
+A reported problem usually arrives with a proposed fix. Treat that fix as evidence about the pain, not the plan: before implementing, answer the three questions under First principles in `.github/pull_request_template.md`. The answers go in the PR body.
 
 ## Definition of Done
 
 A change is done when all of these hold; iterate until they do:
 
-1. `make check` passes: lint, typecheck, tests, real-data-store tests, guards, generated files and build.
+1. `make check` passes.
 2. New or changed behaviour has tests at the seams in § Tests.
 3. Every rule, guard and agent doc the change made stale is updated in the same change.
 4. Each non-obvious choice has its line in `DECISIONS.md` (§ Decisions).
-5. The last mile is verified: whatever was built is confirmed switched on in its target environment (migration applied, scheduled job seen firing, script run, feature reachable). If switch-on has to wait, the final output names exactly what is not live yet and who turns it on.
-6. The PR body answers the three questions in § Fix from first principles.
+5. Switched on: confirmed live in its target environment, or the PR's Not live yet section names what isn't and who turns it on.
 
 ## Decisions
 
-Two tiers, so every non-obvious choice is recorded somewhere:
-
 - **ADR** (`docs/adr/`, via `/domain-modeling`): a choice that is hard to reverse, surprising without context and a real trade-off.
-- **`DECISIONS.md` line** for every other non-obvious choice: picked A over B, declined a dependency, declined a review finding, stopped because a rule forbade something, diverged from the issue's proposal. One line of at most 300 characters: `[YYYY-MM-DD] <decision>: <why>`; the `decisions-format` guard fails any other shape or a longer line. The detail goes in the PR body.
+- **`DECISIONS.md` line** (format in its header; the `decisions-format` guard checks it) for every other non-obvious choice: picked A over B, declined a dependency or a review finding, stopped because a rule forbade something, diverged from the issue's proposal. The detail goes in the PR body.
 
-The ADR criteria decide which tier a choice goes in; a choice that misses them gets a `DECISIONS.md` line. Grep `DECISIONS.md` and `docs/adr/` before reopening a past choice. A question parked for a person gets `[YYYY-MM-DD] ESCALATED: <question> -> <who>`, and later `[YYYY-MM-DD] RESOLVED <escalated date>: <answer>`. Completed months move to `docs/decisions/YYYY-MM.md`.
+Grep both before reopening a past choice.
 
 ## Rules
 
-This file holds what every session needs; keep it under about 120 lines. A rule that applies to part of the tree lives in `.claude/rules/<area>.md`, which loads automatically when a file matching its `paths:` header is touched. Each rule has one home: here or in one rule file. `AGENTS.md` and other docs link to it. A rule that must always hold gets a guard in `scripts/checks/` (contract in its `README.md`, steps in the `add-baseline` skill), and its failure message names the fix.
+This file holds what every session needs; keep it under about 120 lines. A rule for part of the tree lives in `.claude/rules/<area>.md`, loaded when a file matching its `paths:` header is touched. Each rule has one home, here or in one rule file; `AGENTS.md` and other docs link to it. A rule that must always hold gets a guard (`add-baseline` skill).
 
 <!-- One line per rule file: `.claude/rules/<area>.md`: what it covers (the paths it loads for). Delete rule files this repo doesn't need. -->
 
@@ -90,7 +81,7 @@ This file holds what every session needs; keep it under about 120 lines. A rule 
 
 ## Where the skills come from
 
-Everything under `.claude/skills/`, `.claude/agents/impeccable-*` and `.claude/hooks/ponytail-*` is vendored by `scripts/vendor-skills.sh` (see `skills-lock.json`); never edit those files, since a re-run replaces them. The hand-written skills are the folders `skills-lock.json` doesn't list, among them `next-step` (model-invoked on purpose so the agent can pick a flow itself); a re-vendor leaves them alone and checks they survive.
+Everything under `.claude/skills/`, `.claude/agents/impeccable-*` and `.claude/hooks/ponytail-*` is vendored by `scripts/vendor-skills.sh` (see `skills-lock.json`); never edit those files, since a re-run replaces them. The hand-written skills are the folders `skills-lock.json` doesn't list, among them `next-step` (model-invoked on purpose so the agent can pick a flow itself); a re-vendor leaves them alone.
 
 <!-- UI repos: "UI work follows DESIGN.md and PRODUCT.md", once Impeccable has written them. -->
 

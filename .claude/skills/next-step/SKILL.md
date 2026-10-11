@@ -27,7 +27,6 @@ Stop and wait for the user:
 - before every commit, push or PR
 - the environment's stop hook asking to commit and push (`stop-hook-git-check.sh` in cloud sessions) doesn't open this gate: stay stopped and tell the user it fired
 - when a step fails twice, or a skill or `CLAUDE.md` says to ask first (`CLAUDE.md` § Stop and ask)
-- when you park a choice for a person: write its `ESCALATED` line in `DECISIONS.md` first, and its `RESOLVED` line once answered (`CLAUDE.md` § Decisions)
 
 ## Shared steps
 
@@ -35,7 +34,7 @@ The flows below name these:
 
 - **branch**: before the first edit, if on the default branch, branch from it up to date, named by `CLAUDE.md` § Workflow's convention (the spec's or issue's id where there is one). Never commit to the default branch.
 - **implement**: follow `implement`, with two overrides: its `/code-review` is the **review** step below, and its commit waits for the commit gate.
-- **review**: `code-review` against `git merge-base origin/<default branch> HEAD`. The work is not committed yet, so diff the working tree (`git diff <merge-base>`), not `...HEAD`. Give it the ticket or spec as the spec, and `CLAUDE.md`, every `.claude/rules/` file whose `paths:` match the diff (plus `DESIGN.md` if the repo has one) as the standards. Fix what it finds that holds up; list anything you disagree with for the user, and give each finding you decline its `DECISIONS.md` line with the reason.
+- **review**: `code-review` against `git merge-base origin/<default branch> HEAD`. The work is not committed yet, so diff the working tree (`git diff <merge-base>`), not `...HEAD`. Give it the ticket or spec as the spec, and `CLAUDE.md`, every `.claude/rules/` file whose `paths:` match the diff (plus `DESIGN.md` if the repo has one) as the standards. Fix what it finds that holds up; list anything you disagree with for the user, and log each finding you decline (`CLAUDE.md` § Decisions).
 - **commit ⏸**: before the gate, walk `CLAUDE.md` § Definition of Done item by item and show the result; every item holds, or you name the one that doesn't and why.
 - **pr ⏸**: `pr` writes the body, filling every section of `.github/pull_request_template.md`: the three first-principles answers and what is not live yet. The PR names every ticket it closes, with the tracker's closing keyword (`docs/agents/issue-tracker.md`).
 - **screenshot**: start `make up` in the background (`make seed` first if the page needs data; the URL is in `CLAUDE.md` § Commands), then `playwright-cli` at the widths the change can reach (390px phone, 1280px desktop; a change scoped to one breakpoint needs only that width). Save any login state only as `.playwright-cli/<name>.json`.
@@ -67,7 +66,7 @@ A flow's state lives in the tracker (`docs/agents/issue-tracker.md`) and git, ne
 | A new part inside an existing page | New component |
 | Spacing, type, colour, motion or copy | Visual tweak |
 | Tidying structure or finding what to delete | Code health |
-| Changing a guard, baseline, pattern, rule file, CI workflow or ruleset | Guardrail change |
+| Changing a guard, baseline, CI workflow or ruleset | Guardrail change |
 | Too big or foggy to plan in one session | Huge effort |
 | Mid-merge or mid-rebase; a question to research; editing a skill, `CLAUDE.md` or a rule file | One-skill flows |
 
@@ -102,7 +101,7 @@ The UI flows (New view, New component, Visual tweak) apply only to repos with a 
 - [ ] diagnosing-bugs: one command that goes red on this bug, before any theory
 - [ ] tdd: regression test at the seam the bug shows through (CLAUDE.md § Tests)
 - [ ] fix → full suite green
-- [ ] guardrail-from-incident: name the mechanism, then a guard for the whole class (sibling-sweep first when the mechanism can recur elsewhere) and its DECISIONS.md line
+- [ ] guardrail-from-incident, when the mechanism can recur; otherwise say in one line why not
 - [ ] review → commit ⏸ → pr ⏸
 ```
 
@@ -161,7 +160,7 @@ No tickets, and no new test unless the rendered content changes.
 ### Code health
 
 ```
-- [ ] improve-codebase-architecture (structure), ponytail-audit (what to delete), sibling-sweep (a defect pattern across the codebase), add-baseline (a rule that keeps being broken) or claim-sweep (agent docs that no longer match the code)
+- [ ] improve-codebase-architecture (structure), ponytail-audit (what to delete), guardrail-from-incident (a defect pattern across the codebase), add-baseline (a rule that keeps being broken) or claim-sweep (agent docs that no longer match the code)
 - [ ] pick one ⏸
 - [ ] a deepening pick is grilled inside improve-codebase-architecture itself → to-spec (Feature) or branch → implement (Small change); a deletion → Small change
 ```
@@ -170,9 +169,8 @@ No tickets, and no new test unless the rendered content changes.
 
 ```
 - [ ] branch
-- [ ] the change, with its failure message naming the fix and its fixture or failing_example; make guards shows the self-test PASS
-- [ ] a baseline only shrinks (`--shrink`); a raise gets a DECISIONS.md line with the reason ⏸
-- [ ] the rule's § Enforced by (or CLAUDE.md § Hard rules) names the guard
+- [ ] add-baseline (a new guard), or the edit to a guard, CI workflow or ruleset
+- [ ] a baseline only shrinks; a raise gets a DECISIONS.md line with the reason ⏸
 - [ ] review → commit ⏸ → pr ⏸; code owners review it (.github/CODEOWNERS)
 ```
 
@@ -189,7 +187,6 @@ Never go from the map straight to implement unless the effort turned out small. 
 ### One-skill flows
 
 - Mid-merge or mid-rebase → `resolving-merge-conflicts`.
-- A domain agents keep getting wrong (law, tax, a standard) → `write-domain-skill`.
 - A question to answer from primary sources → `research`; where the file goes is in CLAUDE.md § Workflow.
 - Writing or editing a skill, `CLAUDE.md`, a `.claude/rules/` file or another agent doc → `writing-for-agents`, keeping each rule in one home (`CLAUDE.md` § Rules); vendored skills are never edited (CLAUDE.md § Where the skills come from).
 
@@ -199,7 +196,6 @@ Never go from the map straight to implement unless the effort turned out small. 
 - Near the smart zone (about 150k tokens) before that, `/compact` at the nearest phase boundary, never mid-step.
 - At a phase boundary the first that fits wins: **continue** (the next step needs this context verbatim and there's room) → **`/clear`** (nothing here matters next) → **`/handoff`** (a new directory, harness or colleague, or forking a side task) → **subagent** (runs without steering, e.g. a review) → **`/compact`** with an instruction on what to keep.
 - `/wait-what` whenever a message didn't land.
-- Parallel sessions and loops each work on their own branch. Loops follow `.claude/loops.md`, and `check-loops` confirms they run.
 
 ## Guide the user on ponytail
 
@@ -212,9 +208,9 @@ Ponytail's hooks have two quirks; tell the user when they bite:
 
 - **Planning**: `grill-with-docs` (interview that records terms in `CONTEXT.md` and ADRs in `docs/adr/`), `grilling` (the bare interview), `to-spec` (spec as a tracker issue), `to-tickets` (tracer-bullet tickets with blocking edges), `wayfinder` (map of decision tickets), `triage` (raw issues to agent-ready ones).
 - **Building**: `implement` (per ticket, test-first, closes with review), `tdd` (red-green at the agreed seams), `code-review` (Standards and Spec axes against a fixed point), `skeptic-pass` (independent agents try to refute a frozen head), `pr` (the PR body).
-- **Debugging**: `diagnosing-bugs` (feedback loop first, then a regression test), `guardrail-from-incident` (a guard for the whole class of a fixed bug), `sibling-sweep` (every sibling of a defect, fixed, with a detector left behind), `resolving-merge-conflicts` (by intent; never `--abort`).
+- **Debugging**: `diagnosing-bugs` (feedback loop first, then a regression test), `guardrail-from-incident` (every sibling of a fixed bug, and a guard for the whole class), `resolving-merge-conflicts` (by intent; never `--abort`).
 - **UI**: `impeccable` (the design workflow, briefed by `PRODUCT.md` from `impeccable init` and `DESIGN.md` from `impeccable document` or new-work; `live` is local-only), `playwright-cli` (open pages served by the preview command and screenshot them).
 - **Code health**: `improve-codebase-architecture` (deepening opportunities), `codebase-design` (deep-module vocabulary), `domain-modeling` (sharpen a `CONTEXT.md` term or record an ADR), `add-baseline` (adopt a strict rule with a baseline that only shrinks), `claim-sweep` (test agent docs' claims against the code), `ponytail-review` (over-engineering in a diff), `ponytail-audit` (in the whole repo), `ponytail-debt` (every `ponytail:` comment), `ponytail`, `ponytail-help`, `ponytail-gain` (the always-on lazy mode, its command card, its benchmarks).
-- **Research and writing**: `research` (cited Markdown from primary sources), `write-domain-skill` (a sourced domain reference that replaces training data), `writing-for-agents` (skills, `CLAUDE.md`, agent docs).
-- **Session**: `wait-what` (re-explain the last message), `check-loops` (every loop in `.claude/loops.md` is running), `handoff` (a handoff document for another agent or directory).
+- **Research and writing**: `research` (cited Markdown from primary sources), `writing-for-agents` (skills, `CLAUDE.md`, agent docs).
+- **Session**: `wait-what` (re-explain the last message), `handoff` (a handoff document for another agent or directory).
 - **Setup**: `setup-matt-pocock-skills` (tracker, triage labels, doc layout into `docs/agents/`; run once when adopting this template).

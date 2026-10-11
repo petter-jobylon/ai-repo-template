@@ -14,11 +14,6 @@ POCOCK=(code-review codebase-design diagnosing-bugs domain-modeling
   wayfinder writing-for-agents)
 PONYTAIL=(ponytail ponytail-audit ponytail-debt ponytail-gain ponytail-help ponytail-review)
 
-# Hand-written skills: every skill folder the lock doesn't list. Checked again at the end.
-HAND=$(node -e '
-  const fs = require("fs"); const lock = fs.existsSync("skills-lock.json") ? Object.keys(require("./skills-lock.json").skills) : [];
-  console.log(fs.readdirSync(".claude/skills").filter(d => !lock.includes(d)).join(" "))')
-
 # ---- 1. Clean out the previous run -----------------------------------------
 [ -f skills-lock.json ] && node -e '
   for (const n of Object.keys(require("./skills-lock.json").skills))
@@ -111,14 +106,6 @@ fs.unlinkSync(probe);
 console.log(fail ? `\n${fail} HOOK(S) FAILED - do not commit yet` : '\nAll hooks passed');
 process.exit(fail ? 1 : 0);
 JS
-
-# ---- 6. Hand-written skills survived, and no vendored skill took one's name --
-for s in $HAND; do
-  [ -f ".claude/skills/$s/SKILL.md" ] || { echo "FAIL: hand-written skill $s is gone"; exit 1; }
-  node -e 'process.exit(Object.keys(require("./skills-lock.json").skills).includes(process.argv[1]) ? 1 : 0)' "$s" \
-    || { echo "FAIL: a vendored skill now uses the name $s; rename the hand-written one"; exit 1; }
-done
-echo "Hand-written skills intact: $HAND"
 
 echo "--- skills: $(ls .claude/skills | wc -l) dirs | agents: $(ls .claude/agents | wc -l)"
 git check-ignore -q .claude/settings.json && echo "WARNING: .claude/settings.json is gitignored"

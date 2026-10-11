@@ -1,0 +1,29 @@
+# CI for the template repo itself (repository variable TEMPLATE_SELF=true), where the make
+# targets are unfilled on purpose: the guards pass and an unfilled target fails loudly.
+# Adopting repos delete this file.
+name: Template self-test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  template-self-test:
+    if: vars.TEMPLATE_SELF == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - run: make guards
+      - name: Unfilled targets fail loudly
+        run: |
+          if make lint 2>err.txt; then echo "make lint passed while unfilled"; exit 1; fi
+          grep -q "not configured yet" err.txt
