@@ -4,14 +4,11 @@ The map an agent needs before changing structure: the layers, which way dependen
 
 ## Layers
 
-<!-- One row per layer, lowest first. The `layers` guard reads the same layers from scripts/checks/layers.json; keep the two in step. Example for a web app: types, config, data access, services, API, UI. -->
-
-| Layer | Where it lives | May import |
-|---|---|---|
+<!-- One line per layer, lowest first: its name and what it holds. Example for a web app: types, config, data access, services, API, UI. Paths and allowed imports live only in scripts/checks/layers.json. -->
 
 ## Dependency direction
 
-Dependencies point down the table: a layer imports only the layers its row lists. The `layers` guard fails an import that points up or sideways, and its message names the layer to go through instead.
+Dependencies point down the list: a layer imports only the layers its `may_import` names in `scripts/checks/layers.json`, and the `layers` guard fails any other import.
 
 ## Cross-cutting concerns
 

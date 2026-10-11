@@ -1,6 +1,6 @@
 # ai-repo-template
 
-A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus `/next-step`, which picks and runs a flow of those skills (Feature, Small change, Bug, New view…) with gates before every commit, push or PR. It also carries guardrails for repos written mostly by AI agents, taken from what worked in [erp-mafia/accounted](https://github.com/erp-mafia/accounted); `docs/agents/guardrails.md` lists each one, where it lives and how strong it is. It assumes no language, framework or database: the hooks and guards need Node 22 and make, and CI is GitHub Actions.
+A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus `/next-step`, which picks and runs a flow of those skills (Feature, Small change, Bug, New view…) with gates before every push or PR. It also carries guardrails for repos written mostly by AI agents, taken from what worked in [erp-mafia/accounted](https://github.com/erp-mafia/accounted); `docs/agents/guardrails.md` lists each one, where it lives and how strong it is. It assumes no language, framework or database: the hooks and guards need Node 22 and make, and CI is GitHub Actions.
 
 ## What's in it
 
@@ -12,7 +12,7 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 | `.claude/launch.json` | Empty; add your app's dev server |
 | `CLAUDE.md` | Skeleton with the sections `next-step` reads, plus hard rules, stop-and-ask, Definition of Done, first-principles questions and the decision tiers |
 | `AGENTS.md` | Pointer to `CLAUDE.md` for other agent tools, so each rule keeps one home |
-| `ARCHITECTURE.md` | Layers, dependency direction and one interface per cross-cutting concern; the `layers` guard (`scripts/checks/layers.json`) enforces the direction |
+| `ARCHITECTURE.md` | Layers, dependency direction and one interface per cross-cutting concern; the `layers` guard enforces the direction once a repo adds `scripts/checks/layers.json` |
 | `scripts/low-risk-paths.json`, `scripts/merge-check.js` | What an agent may auto-merge once CI is green (`make merge-check`); anything else waits for your go-ahead |
 | `.claude/rules/` | Path-scoped rule skeletons (`api`, `data`, `tests`, `security`, `prod-scripts`), each loaded only for the paths in its header |
 | `.claude/loops.md` | Policy and registry for scheduled agents: propose, merge only low-risk paths, one branch each |

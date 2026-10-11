@@ -28,7 +28,7 @@ Stop and ask; do not guess. How agents reach tickets, logs, errors and metrics, 
 
 ## Architecture
 
-Layers, dependency direction and the one interface per cross-cutting concern: `ARCHITECTURE.md`, enforced by the `layers` guard.
+Layers, dependency direction and the one interface per cross-cutting concern: `ARCHITECTURE.md`, enforced by the `layers` guard once `scripts/checks/layers.json` exists.
 
 <!-- The big picture an agent can't get from one file: the main modules, how data flows between them, where state lives. -->
 

@@ -4,7 +4,6 @@
 //
 //   node scripts/checks/run.js                          self-tests, then all guards
 //   node scripts/checks/run.js --init-baseline <name>   create a missing baseline
-//   node scripts/checks/run.js --report         what each baseline still allows, largest first
 'use strict';
 const fs = require('fs');
 const path = require('path');

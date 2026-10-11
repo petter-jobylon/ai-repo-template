@@ -241,12 +241,11 @@ A common Django split: models hold data and its rules, services hold the use cas
     { "name": "models", "paths": ["**/models.py", "**/models/**"], "modules": ["\\.models(\\.|$)"], "may_import": [] },
     { "name": "services", "paths": ["**/services.py", "**/services/**"], "modules": ["\\.services(\\.|$)"], "may_import": ["models"] },
     { "name": "api", "paths": ["**/views.py", "**/serializers.py", "**/api/**"], "modules": ["\\.(views|serializers|api)(\\.|$)"], "may_import": ["services"] }
-  ],
-  "n/a": null
+  ]
 }
 ```
 
-Write the same three rows in `ARCHITECTURE.md`. Logging goes through one logger; the `no-print` pattern in `scripts/checks/README.md` § Examples keeps `print()` out of app code.
+Name the same three layers in `ARCHITECTURE.md`. Logging goes through one logger; the guard in `scripts/checks/README.md` § Example keeps `print()` out of app code.
 
 ## Low-risk paths
 
