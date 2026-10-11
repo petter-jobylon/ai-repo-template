@@ -13,7 +13,7 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 | `CLAUDE.md` | Skeleton with the sections `next-step` reads, plus hard rules, stop-and-ask, Definition of Done, first-principles questions and the decision tiers |
 | `AGENTS.md` | Pointer to `CLAUDE.md` for other agent tools, so each rule keeps one home |
 | `.claude/rules/` | Path-scoped rules (`api`, `data`, `tests`, `security`, `prod-scripts`, and `agent-tools` for products that expose AI agents), each loaded only for the paths in its header |
-| `.claude/loops.md` | Policy and registry for scheduled agents: propose, never merge, one worktree each |
+| `.claude/loops.md` | Policy and registry for scheduled agents: propose, never merge, one branch each |
 | `DECISIONS.md` | One-line decision log, beside ADRs in `docs/adr/` |
 | `.github/pull_request_template.md` | First-principles answers, what is not live yet, Definition of Done |
 | `docs/agents/guardrails.md` | Every guardrail, where it lives, its strength, and whether this repo has adopted it |
