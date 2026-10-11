@@ -198,7 +198,7 @@ Never go from the map straight to implement unless the effort turned out small. 
 - Near the smart zone (about 150k tokens) before that, `/compact` at the nearest phase boundary, never mid-step.
 - At a phase boundary the first that fits wins: **continue** (the next step needs this context verbatim and there's room) → **`/clear`** (nothing here matters next) → **`/handoff`** (a new directory, harness or colleague, or forking a side task) → **subagent** (runs without steering, e.g. a review) → **`/compact`** with an instruction on what to keep.
 - `/wait-what` whenever a message didn't land.
-- Parallel sessions and loops each work in their own worktree on their own branch (`git worktree add ../<repo>-<slug> -b <branch>`); two sessions never share a checkout. Loops follow `.claude/loops.md`, and `check-loops` confirms they run.
+- Parallel sessions and loops each work on their own branch. Loops follow `.claude/loops.md`, and `check-loops` confirms they run.
 
 ## Guide the user on ponytail
 
