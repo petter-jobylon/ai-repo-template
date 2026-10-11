@@ -39,14 +39,14 @@ A change is done when all of these hold; iterate until they do:
 2. New or changed behaviour has tests at the seams in § Tests.
 3. Every rule, guard and agent doc the change made stale is updated in the same change.
 4. Each non-obvious choice has its line in `DECISIONS.md` (§ Decisions).
-5. Switched on: confirmed live in its target environment, or the PR's Not live yet section names what isn't and who turns it on.
+5. Switched on: confirmed live in its target environment (migration applied, scheduled job seen firing, script run, feature reachable), or the PR's Not live yet section names what isn't and who turns it on.
 
 ## Decisions
 
 - **ADR** (`docs/adr/`, via `/domain-modeling`): a choice that is hard to reverse, surprising without context and a real trade-off.
 - **`DECISIONS.md` line** (format in its header) for every other non-obvious choice: picked A over B, declined a dependency or a review finding, stopped because a rule forbade something, diverged from the issue's proposal. The detail goes in the PR body.
 
-Grep both before reopening a past choice.
+Grep both before reopening a past choice. A question parked for a person gets an `ESCALATED` line, and a `RESOLVED` line once answered; `grep ESCALATED DECISIONS.md` shows what is waiting.
 
 ## Rules
 
