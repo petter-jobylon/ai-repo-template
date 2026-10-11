@@ -1,6 +1,6 @@
 # ai-repo-template
 
-A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus `/next-step`, which picks and runs a flow of those skills (Feature, Small change, Bug, New view…) with gates before every commit, push or PR. It also carries guardrails for repos written mostly by AI agents, taken from what worked in [erp-mafia/accounted](https://github.com/erp-mafia/accounted); `docs/agents/guardrails.md` lists each one, where it lives and how strong it is. Nothing in it assumes a language, framework or database.
+A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus `/next-step`, which picks and runs a flow of those skills (Feature, Small change, Bug, New view…) with gates before every commit, push or PR. It also carries guardrails for repos written mostly by AI agents, taken from what worked in [erp-mafia/accounted](https://github.com/erp-mafia/accounted); `docs/agents/guardrails.md` lists each one, where it lives and how strong it is. It assumes no language, framework or database; the hooks need Node.
 
 ## What's in it
 

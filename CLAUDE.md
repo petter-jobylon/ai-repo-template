@@ -6,11 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Hard rules
 
-<!-- The few invariants every change must keep, one numbered line each with its reason. End each with what enforces it: a check, a test or a database constraint, or "soft: no check yet". Promote a soft rule to a check once it has been skipped. -->
+<!-- The few invariants every change must keep, one numbered line each with its reason. End each with what enforces it: a check, a test or a constraint, or "soft: no check yet". Promote a soft rule to a check once it has been skipped. -->
 
 ## Stop and ask
 
-Stop and ask; do not guess. <!-- The areas where a wrong guess is expensive (e.g. production data, money, auth, legal rules) and who decides each. -->
+Stop and ask; do not guess. <!-- The areas where a wrong guess is expensive (e.g. production data, auth, payments) and who decides each. -->
 
 ## Commands
 
@@ -31,13 +31,7 @@ Don't mock our own modules or add tests at other seams. A new seam needs this se
 
 ## Fix from first principles
 
-A reported problem usually arrives with a proposed fix. Treat that fix as evidence about the pain, and answer three questions before implementing; the answers go in the PR body:
-
-1. **Why did the problem occur?** Name the mechanism, then fix at the level that stops the whole class of bug.
-2. **What could be removed or simplified instead?** Fewer states and less code win unless something concrete needs more.
-3. **Is this the best solution, or just the proposed one?** Write down the alternative you considered and why you did not take it.
-
-When the chosen path differs from the one the issue proposed, log it (§ Decisions).
+A reported problem usually arrives with a proposed fix. Treat that fix as evidence about the pain, not the plan: before implementing, answer the three questions under First principles in `.github/pull_request_template.md`. The answers go in the PR body.
 
 ## Definition of Done
 
@@ -47,21 +41,18 @@ A change is done when all of these hold; iterate until they do:
 2. New or changed behaviour has tests at the seams in § Tests.
 3. Every rule, guard and agent doc the change made stale is updated in the same change.
 4. Each non-obvious choice has its line in `DECISIONS.md` (§ Decisions).
-5. The last mile is verified: whatever was built is confirmed switched on in its target environment (migration applied, scheduled job seen firing, script run, feature reachable). If switch-on has to wait, the final output names exactly what is not live yet and who turns it on.
-6. The PR body answers the three questions in § Fix from first principles.
+5. Switched on: confirmed live in its target environment, or the PR's Not live yet section names what isn't and who turns it on.
 
 ## Decisions
 
-Two tiers, so every non-obvious choice is recorded somewhere:
-
 - **ADR** (`docs/adr/`, via `/domain-modeling`): a choice that is hard to reverse, surprising without context and a real trade-off.
-- **`DECISIONS.md` line** for every other non-obvious choice: picked A over B, declined a dependency, declined a review finding, stopped because a rule forbade something, diverged from the issue's proposal. One line of at most 300 characters: `[YYYY-MM-DD] <decision>: <why>`; the `decisions-format` guard fails any other shape or a longer line. The detail goes in the PR body.
+- **`DECISIONS.md` line** (format in its header; the `decisions-format` guard checks it) for every other non-obvious choice: picked A over B, declined a dependency or a review finding, stopped because a rule forbade something, diverged from the issue's proposal. The detail goes in the PR body.
 
-The ADR criteria decide which tier a choice goes in; a choice that misses them gets a `DECISIONS.md` line. Grep `DECISIONS.md` and `docs/adr/` before reopening a past choice. A question parked for a person gets `[YYYY-MM-DD] ESCALATED: <question> -> <who>`, and later `[YYYY-MM-DD] RESOLVED <escalated date>: <answer>`. Completed months move to `docs/decisions/YYYY-MM.md`.
+Grep both before reopening a past choice.
 
 ## Rules
 
-This file holds what every session needs; keep it under about 120 lines. A rule that applies to part of the tree lives in `.claude/rules/<area>.md`, which loads automatically when a file matching its `paths:` header is touched. Each rule has one home: here or in one rule file. `AGENTS.md` and other docs link to it. A rule that must always hold gets a guard in `scripts/checks/` (contract in its `README.md`, steps in the `add-baseline` skill), and its failure message names the fix.
+This file holds what every session needs; keep it under about 120 lines. A rule for part of the tree lives in `.claude/rules/<area>.md`, loaded when a file matching its `paths:` header is touched. Each rule has one home, here or in one rule file; `AGENTS.md` and other docs link to it. A rule that must always hold gets a guard (`add-baseline` skill).
 
 <!-- One line per rule file: `.claude/rules/<area>.md`: what it covers (the paths it loads for). Delete rule files this repo doesn't need. -->
 
