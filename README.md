@@ -26,9 +26,7 @@ A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus
 | `docs/agents/optional/` | Opt-in pieces to copy in when they apply: `docs/agents/optional/write-domain-skill/` into `.claude/skills/` when agents need facts set by law, tax or a standard, and `docs/agents/optional/product-agents.md` into `.claude/rules/` when the product lets AI agents act for customers |
 | `docs/agents/recipes/` | How to fill each stack slot; today Python, Django, PostgreSQL and Redis |
 | `scripts/vendor-skills.sh` | Re-vendors every third-party skill to latest and self-tests the hooks |
-| `scripts/cloud-tools.sh` | Cloud sessions only: installs `playwright-cli` and `linearis`, trusts the egress proxy's CAs, and starts Docker |
-| `scripts/ensure-docker.sh` | Starts the Docker daemon in a cloud session if it is down; make targets call it, so they work without hooks |
-| `scripts/cloud-env-setup.sh` | Sample for a cloud environment's setup script: toolchain and Docker images, cached between sessions |
+| `scripts/cloud-tools.sh` | Cloud sessions only: installs `playwright-cli` and `linearis`, and trusts the egress proxy's CAs |
 | `.env.example` | Local settings with working defaults; `.env` itself is gitignored |
 | `docs/agents/agent-access.md` | How agents reach tickets, logs, errors and metrics, and what they may not touch |
 | `scripts/impeccable-scope.js` | Tells ponytail to leave design completeness to Impeccable |
@@ -50,10 +48,10 @@ Skills are vendored rather than installed as plugins because cloud sessions igno
 
 ## Cloud sessions
 
-- **Setup script vs hook.** Slow, rarely changing steps (toolchain, Docker images) go in the cloud environment's setup script; start from `scripts/cloud-env-setup.sh`. Fast per-session steps stay in the SessionStart hook (`scripts/cloud-tools.sh`).
-- **Hooks don't run in a session with more than one repo.** Nothing that must happen depends on a hook: the make targets start Docker themselves, and CI runs the guards.
+- **Setup script vs hook.** Slow, rarely changing steps (toolchain, Docker images) go in the cloud environment's setup script; the recipe has one. Fast per-session steps stay in the SessionStart hook (`scripts/cloud-tools.sh`).
+- **Hooks don't run in a session with more than one repo.** Nothing that must happen depends on a hook: the recipe's make targets start Docker themselves, and CI runs the guards.
 - **No `env` block in `.claude/settings.json`.** Self-hosted runners flag one, and refuse the session in enforce mode, so settings that hooks need ride on the hook command instead.
-- **Secrets.** A token in a cloud environment can be read by everyone who uses that environment, so keep to low-risk, tightly scoped tokens. The `no-committed-secrets` guard fails on secrets in the repo.
+- **Secrets.** A token in a cloud environment can be read by everyone who uses that environment, hence `CLAUDE.md` § Hard rules 6.
 
 ## This template repo's own CI
 

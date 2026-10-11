@@ -100,7 +100,7 @@ services:
     healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 1s, retries: 30 }
 ```
 
-Match the image versions to production. Putting `docker compose -f compose.test.yml pull` in the cloud environment's setup script caches the images between sessions.
+Match the image versions to production.
 
 ## Docker in cloud sessions
 
@@ -117,6 +117,22 @@ if [ "$CLAUDE_CODE_REMOTE" = "true" ] && command -v dockerd >/dev/null; then
 fi
 echo "Docker isn't running: start Docker Desktop or the docker service, then rerun" >&2
 exit 1
+```
+
+## Cloud environment setup script
+
+Paste into the cloud environment's setup script (its settings, under Setup script). It runs before any session, without the repo checked out, and can be cached between sessions, so the slow, rarely changing steps go here:
+
+```bash
+set -euo pipefail
+pip install --quiet uv
+uv python install 3.12
+if command -v dockerd >/dev/null; then
+  docker info >/dev/null 2>&1 || (nohup dockerd >/tmp/dockerd.log 2>&1 &)
+  for _ in $(seq 1 20); do docker info >/dev/null 2>&1 && break; sleep 1; done
+  docker pull mirror.gcr.io/library/postgres:16-alpine
+  docker pull mirror.gcr.io/library/redis:7-alpine
+fi
 ```
 
 ## db-test-required guard

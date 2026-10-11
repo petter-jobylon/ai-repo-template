@@ -62,8 +62,7 @@ const put = (manifest, from, to, prefix = {}) => {
 put(process.env.IMP, '${CLAUDE_PLUGIN_ROOT}/skills/impeccable', '${CLAUDE_PROJECT_DIR}/.claude/skills/impeccable');
 // Fresh cloud VMs have an empty ~/.claude, so ponytail would re-issue its
 // "set up a statusline" nudge every session. Pre-create its "already nudged" flag.
-// Ponytail leaves Impeccable's design subagents alone. The matcher rides on the hook command, not
-// in a settings "env" block, which self-hosted runners flag (and refuse in enforce mode).
+// Ponytail leaves Impeccable's subagents alone; the matcher rides on the hook command, as self-hosted runners refuse a settings "env" block.
 put(process.env.PONY, '${CLAUDE_PLUGIN_ROOT}/hooks', '${CLAUDE_PROJECT_DIR}/.claude/hooks', {
   SessionStart: 'mkdir -p "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" && touch "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.ponytail-statusline-nudged"; ',
   SubagentStart: "PONYTAIL_SUBAGENT_MATCHER='^(?!impeccable-)' ",
