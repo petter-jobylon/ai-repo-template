@@ -38,6 +38,8 @@ test-db: ## Tests against the real data stores
 
 The test settings read `DATABASE_URL` and `REDIS_URL` (for example with `dj-database-url`). pytest-django builds the test database from every migration, so each run replays the schema from empty.
 
+An existing Django suite has no `db` marker, and its tests already hit the database: point `test` at the whole suite (`uv run pytest`) and set `test-db` to `@echo "n/a: make test runs against the database"` until new real-store tests get the marker.
+
 ## compose.test.yml
 
 ```yaml
