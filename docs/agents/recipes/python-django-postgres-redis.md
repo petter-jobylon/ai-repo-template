@@ -144,9 +144,9 @@ In `.github/actions/setup/action.yml`, replace the `TOOLCHAIN` comment with:
 
 Use the Python version the project pins. Keep the SHA pin and its version comment.
 
-## Redis
+## Pinned dependencies
 
-Redis holds caches, sessions and queue messages, never a value that must survive a flush. A rule that has to hold (a unique email, a balance, an allowed state change) lives in PostgreSQL as a constraint or trigger, so a Redis outage or eviction can't break it.
+A dependency held at an exact version on purpose gets `==` in `pyproject.toml` and the reason in a comment on the same line. `make setup` runs `uv sync --frozen`, which refuses a lockfile that no longer matches.
 
 ## Production scripts as Django management commands
 

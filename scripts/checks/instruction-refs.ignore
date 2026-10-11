@@ -1,6 +1,6 @@
 # Paths agent docs may name before they exist. One per line; a trailing / covers a folder.
 docs/adr/                         # created on the first ADR (domain-modeling)
-docs/decisions/                   # created when the first month is archived
+scripts/checks/baselines/         # created by run.js --init-baseline
 CONTEXT.md                        # created on the first glossary term (domain-modeling)
 CONTEXT-MAP.md                    # multi-context repos only
 DESIGN.md                         # written by /impeccable
