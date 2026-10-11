@@ -73,11 +73,6 @@ put(process.env.PONY, '${CLAUDE_PLUGIN_ROOT}/hooks', '${CLAUDE_PROJECT_DIR}/.cla
   SessionStart: 'mkdir -p "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" && touch "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.ponytail-statusline-nudged"; ',
   SubagentStart: "PONYTAIL_SUBAGENT_MATCHER='^(?!impeccable-)' ",
 });
-// Migration: this script keeps every key of the existing settings.json, and older copies (this
-// template's main before the move, and repos made from it) set the matcher in an "env" block.
-// Drop that copy, and the block once empty, so a re-vendor leaves no env block. No-op otherwise.
-delete S.env?.PONYTAIL_SUBAGENT_MATCHER;
-if (S.env && !Object.keys(S.env).length) delete S.env;
 fs.writeFileSync(f, JSON.stringify(S, null, 2) + '\n');
 JS
 
