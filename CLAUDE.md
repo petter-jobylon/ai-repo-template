@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Hard rules
 
-1. **What must never break is refused, not requested**: a data-store constraint, a type or a guard enforces it, with no exception for admin roles. A cache or queue never holds such a rule.
+1. **The data store enforces what must never break about stored data**: a constraint, trigger, schema validation or permission, with no exception for admin roles. A rule with no store behind it gets a type or a guard. A cache or queue never holds such a rule.
 2. **One way in per dangerous action** (deletion, permission changes, anything sent outside): one function or endpoint, and a guard or constraint refuses every other path.
 3. **Fail closed**: when a check that decides access or correctness can't run, refuse and say why. Failing open needs a visible trace.
 4. **Closed sets are exhaustive**: a new value fails the typecheck, or a test that enumerates the set, until every place handles it.
