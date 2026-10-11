@@ -1,6 +1,6 @@
-# Every job calls a make target, so CI runs exactly what agents and people run locally.
+# Every job calls make targets, so CI runs exactly what agents and people run locally.
 # Require only "ci-summary" in the ruleset (.github/rulesets/main.json): it runs even when
-# other jobs are skipped, and fails unless each of them did what it should.
+# other jobs fail or are skipped, and passes only when each of them passed.
 name: CI
 
 on:
@@ -16,48 +16,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checks:
+  make:
+    # Skipped only in the template repo itself (repository variable TEMPLATE_SELF=true), whose
+    # targets are unfilled on purpose; template-self-test.yml checks it instead.
     if: vars.TEMPLATE_SELF != 'true'
+    name: make ${{ matrix.targets }}
+    strategy:
+      fail-fast: false
+      matrix:
+        targets: ["lint typecheck guards generate-check", test, test-db, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
-      - run: make lint
-      - run: make typecheck
-      - run: make guards
-      - run: make generate-check
-
-  test:
-    if: vars.TEMPLATE_SELF != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/setup
-      - run: make test
-
-  test-db:
-    if: vars.TEMPLATE_SELF != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/setup
-      - run: make test-db
-
-  build:
-    if: vars.TEMPLATE_SELF != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/setup
-      - run: make build
+      - run: make $TARGETS
+        env:
+          TARGETS: ${{ matrix.targets }}
 
   workflow-lint:
     runs-on: ubuntu-latest
@@ -72,45 +48,18 @@ jobs:
           min-severity: high
           advanced-security: false
 
-  # Runs only in the template repo itself (repository variable TEMPLATE_SELF=true), where the
-  # make targets are deliberately unfilled. Adopting repos skip it and run the jobs above.
-  template-self-test:
-    if: vars.TEMPLATE_SELF == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 22
-      - run: make guards
-      - name: Unfilled targets fail loudly
-        run: |
-          if make lint 2>err.txt; then echo "make lint passed while unfilled"; exit 1; fi
-          grep -q "not configured yet" err.txt
-
   ci-summary:
     name: ci-summary
     if: always()
-    needs: [checks, test, test-db, build, workflow-lint, template-self-test]
+    needs: [make, workflow-lint]
     runs-on: ubuntu-latest
     steps:
-      - name: Every job did what it should
+      - name: Every job passed
         env:
-          TEMPLATE_SELF: ${{ vars.TEMPLATE_SELF }}
-          CHECKS: ${{ needs.checks.result }}
-          TEST: ${{ needs.test.result }}
-          TEST_DB: ${{ needs.test-db.result }}
-          BUILD: ${{ needs.build.result }}
+          MAKE: ${{ needs.make.result }}
           WORKFLOW_LINT: ${{ needs.workflow-lint.result }}
-          SELF_TEST: ${{ needs.template-self-test.result }}
+          TEMPLATE_SELF: ${{ vars.TEMPLATE_SELF }}
         run: |
-          if [ "$TEMPLATE_SELF" = "true" ]; then main=skipped; self=success; else main=success; self=skipped; fi
-          fail=0
-          for pair in "checks:$CHECKS" "test:$TEST" "test-db:$TEST_DB" "build:$BUILD"; do
-            [ "${pair#*:}" = "$main" ] || { echo "${pair%%:*} is ${pair#*:}, expected $main"; fail=1; }
-          done
-          [ "$WORKFLOW_LINT" = "success" ] || { echo "workflow-lint is $WORKFLOW_LINT"; fail=1; }
-          [ "$SELF_TEST" = "$self" ] || { echo "template-self-test is $SELF_TEST, expected $self"; fail=1; }
-          exit $fail
+          echo "make: $MAKE, workflow-lint: $WORKFLOW_LINT"
+          [ "$WORKFLOW_LINT" = success ] || exit 1
+          [ "$MAKE" = success ] || { [ "$TEMPLATE_SELF" = true ] && [ "$MAKE" = skipped ]; }

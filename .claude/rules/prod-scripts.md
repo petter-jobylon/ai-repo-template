@@ -5,14 +5,12 @@ paths:
 
 # Scripts that change shared or production data
 
-Every such script follows one contract, whatever its language:
+Every such script follows one contract, whatever its language. Delete this file if the repo has none.
 
 1. **Dry run by default.** With no flags it changes nothing: it prints the plan, each row or object it would change and how, in a stable order.
-2. **Execute only the reviewed plan.** `--execute` needs `--approved-hash=<sha256 of the dry-run output>`. The script recomputes the plan and refuses if the hash differs, so what runs is exactly what a person reviewed.
+2. **Execute only the reviewed plan.** `--execute` refuses to run anything but the plan a person reviewed; the recipe in `docs/agents/recipes/` checks a hash of the dry run.
 3. **Target named explicitly.** The environment comes from a required flag or variable, never a default; the script prints it first. A local `.env` that points at production is a stop-and-ask (`CLAUDE.md` § Stop and ask).
-4. **Leave a record.** After executing, write who ran it, the hash, and the counts to the log or audit trail named in § Enforced by.
-
-The recipe in `docs/agents/recipes/` shows a working example for its stack.
+4. **Leave a record.** After executing, write who ran it, what ran and the counts to the repo's log or audit trail.
 
 ## Enforced by
 

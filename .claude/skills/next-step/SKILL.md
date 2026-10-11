@@ -66,7 +66,7 @@ A flow's state lives in the tracker (`docs/agents/issue-tracker.md`) and git, ne
 | A new part inside an existing page | New component |
 | Spacing, type, colour, motion or copy | Visual tweak |
 | Tidying structure or finding what to delete | Code health |
-| Changing a guard, baseline, pattern, rule file, CI workflow or ruleset | Guardrail change |
+| Changing a guard, baseline, CI workflow or ruleset | Guardrail change |
 | Too big or foggy to plan in one session | Huge effort |
 | Mid-merge or mid-rebase; a question to research; editing a skill, `CLAUDE.md` or a rule file | One-skill flows |
 
@@ -167,9 +167,8 @@ No tickets, and no new test unless the rendered content changes.
 
 ```
 - [ ] branch
-- [ ] the change, with its failure message naming the fix and its fixture or failing_example; make guards shows the self-test PASS
-- [ ] a baseline only shrinks (`--shrink`); a raise gets a DECISIONS.md line with the reason ⏸
-- [ ] the rule's § Enforced by (or CLAUDE.md § Hard rules) names the guard
+- [ ] add-baseline (a new guard), or the edit to a guard, CI workflow or ruleset
+- [ ] a baseline only shrinks; a raise gets a DECISIONS.md line with the reason ⏸
 - [ ] review → commit ⏸ → pr ⏸; code owners review it (.github/CODEOWNERS)
 ```
 

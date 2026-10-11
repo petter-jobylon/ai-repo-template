@@ -14,7 +14,7 @@ Stop and ask; do not guess. <!-- The areas where a wrong guess is expensive (e.g
 
 ## Commands
 
-`make help` lists the targets (`setup`, `check`, `lint`, `typecheck`, `test`, `test-db`, `guards`, `generate`, `generate-check`, `build`). CI, hooks and loops call only these, so a target's body is the one place a command lives.
+`make help` lists the targets, and `make check` runs what CI runs. CI, hooks and loops call only make targets, so a target's body is the one place a command lives.
 
 <!-- Commands make doesn't cover, from the repo root: how to run one test while iterating. -->
 <!-- Preview (used by /next-step's screenshot step): the one command that serves the app locally with demo data, and its URL. Delete this line if the repo has no UI. -->
@@ -37,7 +37,7 @@ A reported problem usually arrives with a proposed fix. Treat that fix as eviden
 
 A change is done when all of these hold; iterate until they do:
 
-1. `make check` passes: lint, typecheck, tests, real-data-store tests, guards, generated files and build.
+1. `make check` passes.
 2. New or changed behaviour has tests at the seams in § Tests.
 3. Every rule, guard and agent doc the change made stale is updated in the same change.
 4. Each non-obvious choice has its line in `DECISIONS.md` (§ Decisions).
