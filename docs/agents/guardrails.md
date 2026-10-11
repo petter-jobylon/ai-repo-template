@@ -25,7 +25,7 @@ Every guardrail this template carries: where it lives, how strong it is, and whe
 | CI | Pin fragile dependencies exactly, with the reason beside the pin | an unreviewed version bump can take down a feature | first month | stack recipe | soft | not yet |
 | CI | Build every shipped configuration in PR CI | a configuration first built after merge breaks after merge | as you grow | CI workflow `build` job (`make build`) | hard | not yet |
 | Review | Record what happened to each AI review finding | the next session doesn't reopen a finding someone already declined | first month | `CLAUDE.md` § Decisions, `next-step` review step | soft | not yet |
-| Review | Assign human reviewers to the guardrail files | loosening a guard or raising a baseline gets a person's eyes | first month | `.github/CODEOWNERS` | hard | not yet |
+| Review | Assign human reviewers to the guardrail files | loosening a guard or raising a baseline gets a person's eyes | with a team | `.github/CODEOWNERS` | hard | not yet |
 | Review | Make production scripts dry-run by default | what runs against production is what a person reviewed | first month | `.claude/rules/prod-scripts.md`, recipe example | soft | not yet |
 | Review | Track escalated decisions until someone resolves them | questions parked for a person get lost without a list to grep | as you grow | `CLAUDE.md` § Decisions (ESCALATED / RESOLVED) | soft | not yet |
 | Loops | Make local checks call the same scripts as CI | a hand-copied check drifts and stops checking anything | as you grow | `Makefile` targets shared by CI, hooks and loops | hard | not yet |
