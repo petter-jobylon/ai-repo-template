@@ -1,0 +1,4 @@
+{
+  "low_risk": ["docs/**", "DECISIONS.md"],
+  "never": ["docs/agents/**"]
+}

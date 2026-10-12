@@ -1,3 +1,5 @@
+# Personal Claude Code settings; shared settings live in .claude/settings.json
+.claude/settings.local.json
 .playwright-cli/
 # playwright-cli login state (cookies, tokens): never commit
 auth.json
@@ -23,3 +25,8 @@ storage-state-*.json
 .impeccable/live/deferred-svelte-component-accepts.json
 .impeccable/live/*.png
 # impeccable-ignore-end
+
+# Local environment files; .env.example is the committed template
+.env
+.env.*
+!.env.example

@@ -4,9 +4,6 @@
       "Bash(linearis:*)"
     ]
   },
-  "env": {
-    "PONYTAIL_SUBAGENT_MATCHER": "^(?!impeccable-)"
-  },
   "hooks": {
     "SessionStart": [
       {
@@ -72,7 +69,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/ponytail-subagent.js\"",
+            "command": "PONYTAIL_SUBAGENT_MATCHER='^(?!impeccable-)' node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/ponytail-subagent.js\"",
             "timeout": 5,
             "statusMessage": "Loading ponytail mode..."
           }

@@ -1,0 +1,87 @@
+# Every job calls make targets, so CI runs exactly what agents and people run locally.
+# Require only "ci-summary" in the ruleset (.github/rulesets/main.json): it runs even when
+# other jobs fail or are skipped, and passes only when each of them passed.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  make:
+    # Skipped only in the template repo itself (repository variable TEMPLATE_SELF=true), whose
+    # targets are unfilled on purpose; template-self-test runs there instead.
+    if: vars.TEMPLATE_SELF != 'true'
+    name: make ${{ matrix.targets }}
+    strategy:
+      fail-fast: false
+      matrix:
+        targets: ["lint typecheck guards generate-check", test, test-db, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # guards that compare with the base branch need its history
+      - uses: ./.github/actions/setup
+      - run: make $TARGETS
+        env:
+          TARGETS: ${{ matrix.targets }}
+          GUARD_BASE: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
+
+  workflow-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        with:
+          inputs: .github/workflows .github/actions
+          version: 1.30.1
+          min-severity: high
+          advanced-security: false
+
+  # Only in the template repo itself (TEMPLATE_SELF=true): the guards pass and an unfilled
+  # target fails loudly. Adopting repos skip it.
+  template-self-test:
+    if: vars.TEMPLATE_SELF == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - run: make guards
+      - name: Unfilled targets fail loudly
+        run: |
+          if make lint 2>err.txt; then echo "make lint passed while unfilled"; exit 1; fi
+          grep -q "not configured yet" err.txt
+
+  ci-summary:
+    name: ci-summary
+    if: always()
+    needs: [make, workflow-lint, template-self-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every job did what it should
+        env:
+          MAKE: ${{ needs.make.result }}
+          SELF_TEST: ${{ needs.template-self-test.result }}
+          WORKFLOW_LINT: ${{ needs.workflow-lint.result }}
+          TEMPLATE_SELF: ${{ vars.TEMPLATE_SELF }}
+        run: |
+          echo "make: $MAKE, template-self-test: $SELF_TEST, workflow-lint: $WORKFLOW_LINT"
+          # The template repo runs the self-test instead of the make jobs; every other repo the reverse.
+          if [ "$TEMPLATE_SELF" = true ]; then want="skipped success"; else want="success skipped"; fi
+          [ "$WORKFLOW_LINT" = success ] && [ "$MAKE $SELF_TEST" = "$want" ]

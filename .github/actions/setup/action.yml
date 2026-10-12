@@ -1,0 +1,11 @@
+name: Setup
+description: Installs this repo's toolchain and dependencies. The one CI step each repo fills in (docs/agents/recipes/).
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0 (the guard runner needs Node)
+      with:
+        node-version: 22
+    # TOOLCHAIN: add this repo's language runtime here, pinned to a commit SHA (see docs/agents/recipes/).
+    - run: make setup
+      shell: bash

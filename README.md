@@ -1,30 +1,71 @@
 # ai-repo-template
 
-A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus `/next-step`, which picks and runs a flow of those skills (Feature, Small change, Bug, New view…) with gates before every commit, push or PR.
+A Claude Code setup to copy into a repo: vendored skills, agents and hooks, plus `/next-step`, which picks and runs a flow of those skills (Feature, Small change, Bug, New view…) with gates before every push or PR. It also carries guardrails for repos written mostly by AI agents, taken from what worked in [erp-mafia/accounted](https://github.com/erp-mafia/accounted); `docs/agents/guardrails.md` lists each one, where it lives and how strong it is. It assumes no language, framework or database: the hooks and guards need Node 22 and make, and CI is GitHub Actions.
 
 ## What's in it
 
 | Path | What |
 |---|---|
-| `.claude/skills/` | 20 skills from [mattpocock/skills](https://github.com/mattpocock/skills) (planning, tdd, review, debugging), 6 from [ponytail](https://github.com/DietrichGebert/ponytail) (always-on minimal-code mode), [impeccable](https://github.com/pbakaus/impeccable) (UI design), [playwright-cli](https://github.com/microsoft/playwright-cli) (screenshots), [linearis](https://github.com/linearis-oss/linearis) (Linear from the CLI), and the hand-written `next-step` |
+| `.claude/skills/` | 20 skills from [mattpocock/skills](https://github.com/mattpocock/skills) (planning, tdd, review, debugging), 6 from [ponytail](https://github.com/DietrichGebert/ponytail) (always-on minimal-code mode), [impeccable](https://github.com/pbakaus/impeccable) (UI design), [playwright-cli](https://github.com/microsoft/playwright-cli) (screenshots), [linearis](https://github.com/linearis-oss/linearis) (Linear from the CLI), and the hand-written `next-step`, `add-baseline`, `claim-sweep`, `guardrail-from-incident` and `skeptic-pass` |
 | `.claude/agents/`, `.claude/hooks/` | Impeccable's subagents, ponytail's hooks |
 | `.claude/settings.json` | Hook wiring |
 | `.claude/launch.json` | Empty; add your app's dev server |
-| `CLAUDE.md` | Skeleton with the sections `next-step` reads |
+| `CLAUDE.md` | Skeleton with the sections `next-step` reads, plus hard rules, stop-and-ask, Definition of Done, first-principles questions and the decision tiers |
+| `AGENTS.md` | Pointer to `CLAUDE.md` for other agent tools, so each rule keeps one home |
+| `ARCHITECTURE.md` | Layers, dependency direction and one interface per cross-cutting concern; the `layers` guard enforces the direction once a repo adds `scripts/checks/layers.json` |
+| `scripts/low-risk-paths.json`, `scripts/merge-check.js` | What an agent may auto-merge once CI is green (`make merge-check`); anything else waits for your go-ahead |
+| `.claude/rules/` | Path-scoped rule skeletons (`api`, `data`, `tests`, `security`, `prod-scripts`), each loaded only for the paths in its header |
+| `.claude/loops.md` | Policy and registry for scheduled agents: propose, merge only low-risk paths, one branch each |
+| `DECISIONS.md` | One-line decision log, beside ADRs in `docs/adr/` |
+| `.github/pull_request_template.md` | First-principles answers, what is not live yet, Definition of Done |
+| `docs/agents/guardrails.md` | Every guardrail, where it lives, its strength, and whether this repo has adopted it |
+| `Makefile` | The one command interface (`make help`); CI, hooks and loops call only these targets, and an unfilled one fails |
+| `scripts/checks/` | Guard runner, guards (contract in its `README.md`), fixtures that prove each guard can fail, and baselines |
+| `.github/workflows/ci.yml` | The make targets, a zizmor job, and `ci-summary`, the one check to require |
+| `.github/actions/setup/` | The one CI step each repo fills in: its toolchain |
+| `.github/rulesets/main.json` | Ruleset to import: `ci-summary` required, code owner review, no force push |
+| `.github/CODEOWNERS` | Owners for guardrail files (fill in with a team; leave commented out when solo) |
+| `docs/agents/optional/` | Opt-in pieces to copy in when they apply: `docs/agents/optional/write-domain-skill/` into `.claude/skills/` when agents need facts set by law, tax or a standard, and `docs/agents/optional/product-agents.md` into `.claude/rules/` when the product lets AI agents act for customers |
+| `docs/agents/recipes/` | How to fill each stack slot; today Python, Django, PostgreSQL and Redis |
 | `scripts/vendor-skills.sh` | Re-vendors every third-party skill to latest and self-tests the hooks |
 | `scripts/cloud-tools.sh` | Cloud sessions only: installs `playwright-cli` and `linearis`, and trusts the egress proxy's CAs |
+| `.env.example` | Local settings with working defaults; `.env` itself is gitignored |
+| `docs/agents/agent-access.md` | How agents reach tickets, logs, errors and metrics, and what they may not touch |
 | `scripts/impeccable-scope.js` | Tells ponytail to leave design completeness to Impeccable |
 
 Skills are vendored rather than installed as plugins because cloud sessions ignore plugins a repo declares.
 
 ## Adopting it
 
-1. Copy everything except this README into the repo (merge `.gitignore` and any existing `.claude/settings.json` by hand). Needs Node on the machine for the hooks.
-2. Fill in `CLAUDE.md`: every `<!-- -->` prompt, then delete the prompts. Keep the section names: `next-step` refers to § Commands, § Tests, § Workflow and § Where the skills come from.
-3. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed.
-4. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }`.
-5. UI repos: run `/impeccable init` for `PRODUCT.md`, and `/impeccable document` for `DESIGN.md` if the UI already exists.
-6. Try it: `/next-step` with a small change.
+1. Copy everything except this README into the repo (merge `.gitignore` and any existing `.claude/settings.json` by hand). Needs Node 22 or later for the hooks and guards, and make (on Windows through Git Bash or WSL). For Claude Code cloud sessions, also paste the recipe's setup script into the cloud environment (§ Cloud sessions).
+2. Fill in `CLAUDE.md`: every `<!-- -->` prompt, then delete the prompts. Keep the section names: `next-step` and the hand-written skills refer to § Hard rules, § Stop and ask, § Commands, § Tests, § Definition of Done, § Decisions, § Rules, § Workflow and § Where the skills come from.
+3. Fill in the `.claude/rules/` files this repo needs (their `paths:` globs and conventions) and delete the rest; list the ones you keep in `CLAUDE.md` § Rules. Copy in the pieces of `docs/agents/optional/` that apply (the table above says when).
+4. Run `/setup-matt-pocock-skills`: it picks the issue tracker, triage labels and doc layout, writes `docs/agents/`, and adds `## Agent skills` to `CLAUDE.md`. On Linear, set `LINEAR_API_TOKEN` (a Linear personal API key) in the environment; `linearis` reads it and `Bash(linearis:*)` is pre-allowed. Then write the rows of `docs/agents/agent-access.md`: how agents reach tickets, logs, errors and metrics, and what they may not do there.
+5. Add the dev server to `.claude/launch.json`, e.g. `{ "name": "app", "runtimeExecutable": "make", "runtimeArgs": ["up"], "port": 8000 }`.
+6. UI repos: run `/impeccable init` for `PRODUCT.md`, and `/impeccable document` for `DESIGN.md` if the UI already exists.
+7. Fill in every `Makefile` target from the recipe for your stack (`docs/agents/recipes/`), or set it to `@echo "n/a: <reason>"`, and add your toolchain to `.github/actions/setup/action.yml`. To require a real-store test with each migration, add `scripts/checks/db-test-required.json`; to enforce the layers in `ARCHITECTURE.md`, add `scripts/checks/layers.json` (the recipe has both). Turn on "Allow auto-merge" in the repo settings if agents should auto-merge low-risk PRs. `make check` passing locally is the bar; in an existing repo, see § Adopting into an existing repo.
+8. Import the ruleset: `gh api -X POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json`. It requires `ci-summary`, so a red CI blocks the merge. With a team, fill in `.github/CODEOWNERS` first, so a second person approves guardrail changes. As a solo maintainer, leave it commented out: agents open PRs as you, GitHub doesn't let a PR's author approve it, and required code owner review would block every guardrail PR. Agents already stop for your go-ahead before every push and PR, and `make merge-check` never calls a guardrail change low-risk.
+9. Go through `docs/agents/guardrails.md`: mark each guardrail `yes` or `n/a` under Adopted here as the repo takes it on.
+10. Try it: `/next-step` with a small change.
+
+## Adopting into an existing repo
+
+1. **Merge instead of overwriting** `CLAUDE.md` and `AGENTS.md` (move what they say into the skeleton's sections or `.claude/rules/`), the `Makefile` (wrap the commands the repo already uses in its targets), `.github/workflows/ci.yml` and the PR template.
+2. **Run `make guards` first** and fix or freeze what it finds: stale paths in the existing docs get fixed or baselined (`node scripts/checks/run.js --init-baseline <guard>`), and an over-long `CLAUDE.md` moves detail into `.claude/rules/`. `no-committed-secrets` lists committed `.env` files and key-shaped strings: rotate any real secret, and baseline what is safe to keep: test fixtures, and an env file committed on purpose, which also needs a `!.env.<name>` line in `.gitignore`.
+3. **Lint and typecheck start from today's errors**: suppress them with the tool's own baseline or per-file ignores, or start the typecheck lenient, then tighten.
+4. **Import the ruleset last**, once the new `.github/workflows/ci.yml` has produced a green `ci-summary`, and drop required checks the new CI no longer runs from any old branch protection; otherwise every PR is blocked.
+5. **The hard rules apply to new and changed code.** Legacy code gets baselines (`add-baseline`) and tickets, not a rewrite. Adding a constraint to a table whose existing rows break it is a stop-and-ask.
+
+## Cloud sessions
+
+- **Setup script vs hook.** Slow, rarely changing steps (toolchain, Docker images) go in the cloud environment's setup script; the recipe has one. Fast per-session steps stay in the SessionStart hook (`scripts/cloud-tools.sh`).
+- **Hooks don't run in a session with more than one repo.** Nothing that must happen depends on a hook: the recipe's make targets start Docker themselves, and CI runs the guards.
+- **No `env` block in `.claude/settings.json`.** Self-hosted runners flag one, and refuse the session in enforce mode, so settings that hooks need ride on the hook command instead.
+- **Secrets.** A token in a cloud environment can be read by everyone who uses that environment, hence `CLAUDE.md` § Hard rules 6.
+
+## This template repo's own CI
+
+The template's make targets are unfilled on purpose. With the repository variable `TEMPLATE_SELF=true` (Settings, Secrets and variables, Actions, Variables), set only in this repo, CI skips the make jobs and runs `template-self-test` instead, and `ci-summary` requires it. Adopting repos leave the variable unset.
 
 ## Updating the skills
 
